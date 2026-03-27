@@ -131,6 +131,7 @@ public final class RenderUtil {
                     GL11.glTranslated(0, -0.45, 0);
                 }
                 GL11.glPushMatrix();
+                GL11.glTranslatef(0.0F, player.yOffset, 0.0F);
                 renderer.render(player, entity, 0, 0, 0, 0.0F, 1.0F);
                 GL11.glPopMatrix();
                 // 清理实体渲染
@@ -296,8 +297,9 @@ public final class RenderUtil {
     private static void renderExtraEntity(float yaw, EntityPlayer player, RenderManager dispatcher, Entity entity) {
         GL11.glRotatef(yaw, 0, 1, 0);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        // renderEntity Args: entityIn, x, y, z, yaw, partialTicks, hideBox
-        dispatcher.func_147939_a(entity, 0, -entity.getMountedYOffset() - player.getYOffset(), 0, 0.0F, 1.0F, false);
+        GL11.glTranslatef(0.0F, entity.yOffset, 0.0F);
+        // Args: entity, x, y, z, yaw, partialTicks
+        dispatcher.renderEntityWithPosYaw(entity, 0, -entity.getMountedYOffset() - player.getYOffset(), 0, 0.0F, 1.0F);
         // 清理实体渲染
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
         GL11.glEnable(GL11.GL_COLOR_MATERIAL);
@@ -393,6 +395,7 @@ public final class RenderUtil {
         dispatcher.playerViewY = xp;
         //dispatcher.setRenderShadow(false);
         GL11.glPushMatrix();
+        GL11.glTranslatef(0.0F, player.yOffset, 0.0F);
         renderer.render(player, entity, 0, 0, 0, 0.0F, 1.0F);
         GL11.glPopMatrix();
         //dispatcher.setRenderShadow(true);
@@ -444,8 +447,9 @@ public final class RenderUtil {
         yRot = 180.0F - yRot;
         renderDispatcher.playerViewY = yRot;
         //renderDispatcher.setRenderShadow(false);
-        // renderEntity Args: entityIn, x, y, z, yaw, partialTicks, hideBox
-        renderDispatcher.func_147939_a(player, 0, 0, 0, 0.0F, 1.0F, false);
+        GL11.glTranslatef(0.0F, player.yOffset, 0.0F);
+        // Args: entity, x, y, z, yaw, partialTicks
+        renderDispatcher.renderEntityWithPosYaw(player, 0, 0, 0, 0.0F, 1.0F);
         //renderDispatcher.setRenderShadow(true);
         GL11.glPopMatrix();
 

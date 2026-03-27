@@ -165,6 +165,7 @@ public abstract class GeoReplacedEntityRenderer<T extends EntityLivingBase, E ex
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
         GL11.glEnable(GL11.GL_ALPHA_TEST);
         GL11.glTranslatef(0, 0.01f, 0);
+        GL11.glTranslatef(0.0F, -24.0F * 0.0625F - 0.0078125F, 0.0F);
         boolean mainBrightness = this.setDoRenderBrightness(entity, partialTick);
 
         Color renderColor = this.getRenderColor(entity, partialTick);
@@ -217,7 +218,6 @@ public abstract class GeoReplacedEntityRenderer<T extends EntityLivingBase, E ex
         if (this.renderManager.livingPlayer != null) {
             this.passSpecialRender(entity, x, y, z);
         }
-        this.passSpecialRender(entity, x, y, z);
 
         /// {@link net.minecraft.client.renderer.entity.RenderLiving#doRender(EntityLiving, double, double, double, float, float)}
         if (entity instanceof EntityLiving mob) {

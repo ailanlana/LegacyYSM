@@ -124,8 +124,9 @@ public class ClientModelManager {
     }
 
     private static void registerTexture(ResourceLocation textureId, byte[] data) {
-        // 1.7.10 已经在主线程了
-        Minecraft.getMinecraft().getTextureManager().loadTexture(textureId, new OuterFileTexture(data));
+        // 确保主线程上传
+        final Minecraft mc = Minecraft.getMinecraft();
+        mc.func_152344_a(() -> mc.getTextureManager().loadTexture(textureId, new OuterFileTexture(data)));
     }
 
     private static void registerAnimations(ResourceLocation mainId, Map<String, byte[]> mapData) {

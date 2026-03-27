@@ -33,7 +33,6 @@ public class KeyCompat {
         final IKeyBinding keyBinding = (IKeyBinding) key;
         keyBinding.setKeyConflictContext(KeyConflictContext.valueOf(conflictContext.name()));
         keyBinding.setInitialKeyModifierAndCode(KeyModifier.valueFromString(modifier.name()), key.getKeyCodeDefault());
-        YesSteveModel.LOGGER.error(keyBinding.getKeyModifierDefault().name());
     }
 
     @SuppressWarnings({"rawtypes", "JavaReflectionMemberAccess", "unchecked"})
