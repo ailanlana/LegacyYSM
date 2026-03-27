@@ -2,20 +2,20 @@ package com.elfmcys.yesstevemodel.network.message;
 
 import com.elfmcys.yesstevemodel.event.CapabilityEvent;
 import com.elfmcys.yesstevemodel.model.ServerModelManager;
+import com.elfmcys.yesstevemodel.network.message.util.ExtendedBuffer;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import javax.annotation.Nullable;
 
-public class SetModelAndTexture implements IPacketBufferMessage {
+public class SetModelAndTexture implements IExtendedBufferMessage {
     private ResourceLocation modelId;
     private ResourceLocation selectTexture;
 
+    @SuppressWarnings("unused")
     public SetModelAndTexture() {
     }
 
@@ -25,15 +25,15 @@ public class SetModelAndTexture implements IPacketBufferMessage {
     }
 
     @Override
-    public void toBytes(PacketBuffer buf) {
-        buf.writeResourceLocation(this.modelId);
-        buf.writeResourceLocation(this.selectTexture);
+    public void toBytes(ExtendedBuffer buf) {
+        buf.writeResourceLocationToBuffer(this.modelId);
+        buf.writeResourceLocationToBuffer(this.selectTexture);
     }
 
     @Override
-    public void fromBytes(PacketBuffer buf) {
-        this.modelId = buf.readResourceLocation();
-        this.selectTexture = buf.readResourceLocation();
+    public void fromBytes(ExtendedBuffer buf) {
+        this.modelId = buf.readResourceLocationFromBuffer();
+        this.selectTexture = buf.readResourceLocationFromBuffer();
     }
 
     public static class Handler implements IMessageHandler<SetModelAndTexture, IMessage> {
@@ -41,20 +41,15 @@ public class SetModelAndTexture implements IPacketBufferMessage {
         @Override
         public IMessage onMessage(SetModelAndTexture message, MessageContext ctx) {
             if (ctx.side.isServer()) {
-                FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> {
-                    EntityPlayerMP sender = ctx.getServerHandler().player;
-                    if (sender == null) {
-                        return;
-                    }
-                    handleCapability(message, sender);
-                });
+                EntityPlayerMP sender = ctx.getServerHandler().playerEntity;
+                if (sender != null) handleCapability(message, sender);
             }
             return null;
         }
 
         private static void handleCapability(SetModelAndTexture message, EntityPlayerMP sender) {
             CapabilityEvent.getModelInfoCap(sender).ifPresent(modelIdCap -> CapabilityEvent.getAuthModelsCap(sender).ifPresent(ownModelsCap -> {
-                if (!ServerModelManager.AUTH_MODELS.contains(message.modelId.getPath()) || ownModelsCap.containModel(message.modelId)) {
+                if (!ServerModelManager.AUTH_MODELS.contains(message.modelId.getResourcePath()) || ownModelsCap.containModel(message.modelId)) {
                     modelIdCap.setModelAndTexture(message.modelId, message.selectTexture);
                 }
             }));

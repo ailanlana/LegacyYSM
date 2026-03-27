@@ -1,16 +1,19 @@
 package com.elfmcys.yesstevemodel.client;
 
 import com.elfmcys.yesstevemodel.CommonProxy;
+import com.elfmcys.yesstevemodel.bukkit.event.ClearNPCdataEvent;
 import com.elfmcys.yesstevemodel.client.animation.AnimationRegister;
 import com.elfmcys.yesstevemodel.client.compat.Mods;
+import com.elfmcys.yesstevemodel.client.config.ConfigSyncEvent;
+import com.elfmcys.yesstevemodel.client.event.*;
 import com.elfmcys.yesstevemodel.client.input.*;
 import com.elfmcys.yesstevemodel.client.renderer.CustomArrowRenderer;
 import com.elfmcys.yesstevemodel.client.renderer.CustomPlayerRenderer;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.common.MinecraftForge;
 
 @SuppressWarnings("unused")
 public class ClientProxy extends CommonProxy {
@@ -43,8 +46,29 @@ public class ClientProxy extends CommonProxy {
         AnimationRegister.registerAnimationState();
         AnimationRegister.registerVariables();
 
-        RenderManager context = Minecraft.getMinecraft().getRenderManager();
-        CUSTOM_PLAYER_RENDERER = new CustomPlayerRenderer(context);
-        CUSTOM_ARROW_RENDERER = new CustomArrowRenderer(context);
+        CUSTOM_PLAYER_RENDERER = new CustomPlayerRenderer();
+        CUSTOM_ARROW_RENDERER = new CustomArrowRenderer();
+    }
+
+    @Override
+    protected void registerEvents() {
+        super.registerEvents();
+        FMLCommonHandler.instance().bus().register(new ConfigSyncEvent());
+        FMLCommonHandler.instance().bus().register(new PlayerMoveEvent());
+
+        FMLCommonHandler.instance().bus().register(new ClearNPCdataEvent());
+
+        FMLCommonHandler.instance().bus().register(new AnimationRouletteKey());
+        FMLCommonHandler.instance().bus().register(new DebugAnimationKey());
+        FMLCommonHandler.instance().bus().register(new ExtraAnimationKey());
+        FMLCommonHandler.instance().bus().register(new ExtraPlayerConfigKey());
+        FMLCommonHandler.instance().bus().register(new PlayerModelScreenKey());
+
+        MinecraftForge.EVENT_BUS.register(new DebugAnimationKey());
+        MinecraftForge.EVENT_BUS.register(new ReloadResourceEvent());
+        MinecraftForge.EVENT_BUS.register(new RenderExtraPlayerScreenEvent());
+        MinecraftForge.EVENT_BUS.register(new RenderFirstPlayerBackground());
+        MinecraftForge.EVENT_BUS.register(new ReplacePlayerRenderEvent());
+        MinecraftForge.EVENT_BUS.register(new VanillaPlayerRenderEvent());
     }
 }

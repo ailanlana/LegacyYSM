@@ -1,15 +1,16 @@
 package com.elfmcys.yesstevemodel.util;
 
-import com.elfmcys.yesstevemodel.client.compat.CameraCompat;
 import com.elfmcys.yesstevemodel.geckolib3.core.util.MathUtil;
+import com.elfmcys.yesstevemodel.geckolib3.util.VectorUtils;
 import com.elfmcys.yesstevemodel.mclib.utils.Interpolations;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 
 /**
  * 用于补全一部分旧版缺失的内容
@@ -41,18 +42,30 @@ public final class EntityUtil {
     }
 
     public static float getGroundSpeed(Entity entity) {
-        return 20 * MathHelper.sqrt((float) (entity.motionX * entity.motionX + entity.motionZ * entity.motionZ));
+        return 20 * MathHelper.sqrt_float((float) (entity.motionX * entity.motionX + entity.motionZ * entity.motionZ));
     }
 
     public static float getVerticalSpeed(Entity entity) {
         return 20 * (float) (entity.posY - entity.prevPosY);
     }
 
+    public static int getItemInUseMaxCount(EntityPlayer player) {
+        return player.isUsingItem() ? player.getItemInUse().getMaxItemUseDuration() - player.getItemInUseCount() : 0;
+    }
+
+    public static Vec3 getPositionVector(Entity entity) {
+        return Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ);
+    }
+
+    public static int getHorizontalIndex(Entity entity) {
+        return MathHelper.floor_double(entity.rotationYaw * 4.0F / 360.0F + 0.5D) & 3;
+    }
+
     /// {@link net.minecraft.client.renderer.EntityRenderer#orientCamera(float)}
     @SuppressWarnings("JavadocReference")
-    public static Vec3d getCameraPosition(Minecraft mc, float partialTicks) {
-        Entity entity = mc.getRenderViewEntity();
-        if (entity == null) return Vec3d.ZERO;
+    public static Vec3 getCameraPosition(Minecraft mc, float partialTicks) {
+        Entity entity = mc.renderViewEntity;
+        if (entity == null) return VectorUtils.VEC_3D_ZERO;
 
         double eyeX = Interpolations.lerp(entity.prevPosX, entity.posX, partialTicks);
         double eyeY = Interpolations.lerp(entity.prevPosY, entity.posY, partialTicks) + entity.getEyeHeight();
@@ -61,7 +74,7 @@ public final class EntityUtil {
         if (entity instanceof EntityLivingBase living && living.isPlayerSleeping()) {
             eyeY += 1.0D;
         }
-        Vec3d eyePos = new Vec3d(eyeX, eyeY, eyeZ);
+        Vec3 eyePos = Vec3.createVectorHelper(eyeX, eyeY, eyeZ);
 
         /*
         第一人称
@@ -75,7 +88,7 @@ public final class EntityUtil {
         if (mc.gameSettings.debugCamEnable) {
             // 在调试模式下，原版会跳过所有防穿墙和视角旋转
             // 镜头会死死地固定在玩家眼部绝对坐标的 Z 轴正方向 +4.0 的位置
-            return new Vec3d(eyeX, eyeY, eyeZ + 4.0D);
+            return Vec3.createVectorHelper(eyeX, eyeY, eyeZ + 4.0D);
         }
 
         /*
@@ -107,7 +120,7 @@ public final class EntityUtil {
             float boxOffsetZ = (float) ((i >> 2 & 1) * 2 - 1) * 0.1F;
 
             // 起点：眼部的边角
-            Vec3d startPos = new Vec3d(
+            Vec3 startPos = Vec3.createVectorHelper(
                     eyeX + (double) boxOffsetX,
                     eyeY + (double) boxOffsetY,
                     eyeZ + (double) boxOffsetZ
@@ -115,17 +128,14 @@ public final class EntityUtil {
 
             // 终点：拉远后相机的边角
             // 然而，原版把 Z 轴偏移错误地加到了 X 轴 上……
-            Vec3d endPos = new Vec3d(
+            Vec3 endPos = Vec3.createVectorHelper(
                     eyeX - offsetX + (double) boxOffsetX + (double) boxOffsetZ, // <--- boxOffsetZ，不应该加的
                     eyeY - offsetY + (double) boxOffsetY,
                     eyeZ - offsetZ + (double) boxOffsetZ
             );
 
             // 发射检测射线
-            RayTraceResult rayTrace = CameraCompat.bypassesNonSolidBlocks() ?
-                    /// {@link mod.acgaming.universaltweaks.tweaks.entities.playerf5.mixin.UTEntityRendererMixin}
-                    mc.world.rayTraceBlocks(startPos, endPos, false, true, true) :
-                    mc.world.rayTraceBlocks(startPos, endPos);
+            MovingObjectPosition rayTrace = mc.theWorld.rayTraceBlocks(startPos, endPos);
             if (rayTrace != null) {
                 // 如果撞墙，算出眼部中心点到撞墙点的距离
                 double hitDistance = rayTrace.hitVec.distanceTo(eyePos);
@@ -135,7 +145,7 @@ public final class EntityUtil {
         }
 
         // 最终坐标
-        return new Vec3d(
+        return Vec3.createVectorHelper(
                 eyeX - (double) (-MathHelper.sin(yawRadians) * MathHelper.cos(pitchRadians)) * cameraDistance,
                 eyeY - (double) (-MathHelper.sin(pitchRadians)) * cameraDistance,
                 eyeZ - (double) (MathHelper.cos(yawRadians) * MathHelper.cos(pitchRadians)) * cameraDistance

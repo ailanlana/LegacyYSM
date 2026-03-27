@@ -9,7 +9,6 @@ import net.minecraft.client.resources.I18n;
 import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.util.List;
 
 public class ExtraPlayerConfigScreen extends Screen {
@@ -56,18 +55,18 @@ public class ExtraPlayerConfigScreen extends Screen {
         String component = I18n.format("gui.yes_steve_model.extra_player_render.tips");
         List<String> split = this.listLineBreakStringToWidth(component, 500);
         for (String charSequence : split) {
-            int w = this.fontRenderer.getStringWidth(charSequence);
-            this.drawString(this.fontRenderer, charSequence, this.width - 15 - w, y, 0xFFFFFF);
+            int w = this.fontRendererObj.getStringWidth(charSequence);
+            this.drawString(this.fontRendererObj, charSequence, this.width - 15 - w, y, 0xFFFFFF);
             y += 10;
         }
 
-        if (this.mc.player != null) {
-            RenderUtil.renderPlayerEntity(this.mc.player, this.posX, this.posY, this.scale, this.yawOffset, 50);
+        if (this.mc.thePlayer != null) {
+            RenderUtil.renderPlayerEntity(this.mc.thePlayer, this.posX, this.posY, this.scale, this.yawOffset, 50);
         }
     }
 
     @Override
-    public void mouseClicked(int mouseX, int mouseY, int button) throws IOException {
+    public void mouseClicked(int mouseX, int mouseY, int button) {
         boolean xIn = this.posX - 5 < mouseX && mouseX < this.posX + 5;
         boolean yIn = this.posY - 5 < mouseY && mouseY < this.posY + 5;
         if (button == LEFT_MOUSE_BUTTON && xIn && yIn) {
@@ -84,10 +83,10 @@ public class ExtraPlayerConfigScreen extends Screen {
     }
 
     @Override
-    public void mouseReleased(int mouseX, int mouseY, int button) {
+    public void mouseMovedOrUp(int mouseX, int mouseY, int button) {
         this.isChangePos = false;
         this.isChangeScale = false;
-        super.mouseReleased(mouseX, mouseY, button);
+        super.mouseMovedOrUp(mouseX, mouseY, button);
     }
 
     @Override
@@ -109,7 +108,7 @@ public class ExtraPlayerConfigScreen extends Screen {
     }
 
     @Override
-    public void keyTyped(char typedChar, int keyCode) throws IOException {
+    public void keyTyped(char typedChar, int keyCode) {
         if (keyCode == Keyboard.KEY_R && isAltKeyDown()) {
             this.posX = 10;
             this.posY = 10;

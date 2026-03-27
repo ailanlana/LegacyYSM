@@ -14,6 +14,7 @@ import com.elfmcys.yesstevemodel.geckolib3.geo.render.built.GeoModel;
 import com.elfmcys.yesstevemodel.geckolib3.model.provider.GeoModelProvider;
 import com.elfmcys.yesstevemodel.geckolib3.model.provider.IAnimatableModelProvider;
 import com.elfmcys.yesstevemodel.geckolib3.resource.GeckoLibCache;
+import com.elfmcys.yesstevemodel.mixin.early.client.MinecraftAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -43,14 +44,15 @@ public abstract class AnimatedGeoModel<T extends IAnimatable> extends GeoModelPr
         AnimationData manager = animatable.getFactory().getOrCreateAnimationData(instanceId);
         AnimationEvent<T> predicate;
         double currentTick = animatable instanceof Entity ? ((EntityLivingBase) animatable).ticksExisted : this.getCurrentTick();
+        float renderPartialTicks = ((MinecraftAccessor) mc).getTimer().renderPartialTicks;
 
         if (manager.startTick == -1) {
-            manager.startTick = currentTick + mc.getRenderPartialTicks();
+            manager.startTick = currentTick + renderPartialTicks;
         }
 
         if (!mc.isGamePaused() || manager.shouldPlayWhilePaused) {
             if (animatable instanceof EntityLivingBase) {
-                manager.tick = currentTick + mc.getRenderPartialTicks();
+                manager.tick = currentTick + renderPartialTicks;
                 double gameTick = manager.tick;
                 double deltaTicks = gameTick - this.lastGameTickTime;
                 this.seekTime += deltaTicks;

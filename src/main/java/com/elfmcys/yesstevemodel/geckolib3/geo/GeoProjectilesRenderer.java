@@ -11,13 +11,13 @@ import com.elfmcys.yesstevemodel.geckolib3.util.EModelRenderCycle;
 import com.elfmcys.yesstevemodel.geckolib3.util.IRenderCycle;
 import com.elfmcys.yesstevemodel.mclib.utils.Interpolations;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class GeoProjectilesRenderer<T extends Entity, E extends IAnimatable> extends Render<T> implements IGeoRenderer<T> {
+public class GeoProjectilesRenderer<T extends Entity, E extends IAnimatable> extends Render implements IGeoRenderer<T> {
     protected static final Map<Class<? extends IAnimatable>, GeoProjectilesRenderer> renderers = new ConcurrentHashMap<>();
 
     static {
@@ -40,22 +40,27 @@ public class GeoProjectilesRenderer<T extends Entity, E extends IAnimatable> ext
     protected E animatable;
     private IRenderCycle currentModelRenderCycle = EModelRenderCycle.INITIAL;
 
-    public GeoProjectilesRenderer(RenderManager renderManager, AnimatedGeoModel<IAnimatable> modelProvider, E animatable) {
-        super(renderManager);
+    public GeoProjectilesRenderer(AnimatedGeoModel<IAnimatable> modelProvider, E animatable) {
+        super();
+        this.setRenderManager(RenderManager.instance);
         this.modelProvider = modelProvider;
         this.animatable = animatable;
         renderers.putIfAbsent(animatable.getClass(), this);
     }
 
     @Override
-    public void doRender(@Nonnull T entity, double x, double y, double z, float yaw, float partialTick) {
+    public void doRender(@Nonnull Entity entity, double x, double y, double z, float yaw, float partialTick) {
+        this.render((T) entity, x, y, z, yaw, partialTick);
+    }
+
+    public void render(@Nonnull T entity, double x, double y, double z, float yaw, float partialTick) {
         GeoModel model = this.modelProvider.getModel(this.modelProvider.getModelLocation(this.animatable));
         this.setCurrentModelRenderCycle(EModelRenderCycle.INITIAL);
-        GlStateManager.pushMatrix();
-        GlStateManager.disableCull();
-        GlStateManager.translate(x, y, z);
-        GlStateManager.rotate(Interpolations.lerp(entity.prevRotationYaw, entity.rotationYaw, partialTick) - 90, 0, 1, 0);
-        GlStateManager.rotate(Interpolations.lerp(entity.prevRotationPitch, entity.rotationPitch, partialTick), 0, 0, 1);
+        GL11.glPushMatrix();
+        GL11.glDisable(GL11.GL_CULL_FACE);
+        GL11.glTranslated(x, y, z);
+        GL11.glRotatef(Interpolations.lerp(entity.prevRotationYaw, entity.rotationYaw, partialTick) - 90, 0, 1, 0);
+        GL11.glRotatef(Interpolations.lerp(entity.prevRotationPitch, entity.rotationPitch, partialTick), 0, 0, 1);
 
         /*
         参考 RenderArrow
@@ -65,7 +70,7 @@ public class GeoProjectilesRenderer<T extends Entity, E extends IAnimatable> ext
         if (entity instanceof EntityArrow arrow) {
             float deltaShake = arrow.arrowShake - partialTick;
             if (deltaShake > 0.0F) {
-                GlStateManager.rotate(-MathHelper.sin(deltaShake * 3.0F) * deltaShake, 0.0F, 0.0F, 1.0F);
+                GL11.glRotatef(-MathHelper.sin(deltaShake * 3.0F) * deltaShake, 0.0F, 0.0F, 1.0F);
             }
         }
          */
@@ -74,67 +79,42 @@ public class GeoProjectilesRenderer<T extends Entity, E extends IAnimatable> ext
         this.modelProvider.setCustomAnimations(this.animatable, this.getInstanceId(entity), predicate);
 
         Minecraft mc = Minecraft.getMinecraft();
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.enableAlpha();
-        GlStateManager.translate(0, 0.01f, 0);
+        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+        GL11.glEnable(GL11.GL_ALPHA_TEST);
+        GL11.glTranslatef(0, 0.01f, 0);
         boolean scoreTeamColor = false;
-        if (this.renderOutlines) {
-            scoreTeamColor = this.setScoreTeamColor(entity);
-            GlStateManager.enableColorMaterial();
-            GlStateManager.enableOutlineMode(this.getTeamColor(entity));
-        }
 
         Color renderColor = this.getRenderColor(entity, partialTick);
-        boolean isVisible = this.isVisible(entity);
-        boolean isGhost = !isVisible && !entity.isInvisibleToPlayer(mc.player);
-        if ((isVisible || isGhost) && this.bindEntityTexture(entity)) {
-            if (isGhost) GlStateManager.enableBlendProfile(GlStateManager.Profile.TRANSPARENT_MODEL);
+        boolean isVisible = !entity.isInvisible();
+        boolean isGhost = !isVisible && !entity.isInvisibleToPlayer(mc.thePlayer);
+        if (isVisible || isGhost) {
+            this.bindEntityTexture(entity);
+            if (isGhost) {
+                // GlStateManager.Profile.TRANSPARENT_MODEL
+                GL11.glPushMatrix();
+                GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.15F);
+                GL11.glDepthMask(false);
+                GL11.glEnable(GL11.GL_BLEND);
+                GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+                GL11.glAlphaFunc(GL11.GL_GREATER, 1.0F / 255.0F);
+            }
             this.render(model, entity, partialTick,
                     (float) renderColor.getRed() / 255f, (float) renderColor.getGreen() / 255f,
                     (float) renderColor.getBlue() / 255f, (float) renderColor.getAlpha() / 255);
-            if (isGhost) GlStateManager.disableBlendProfile(GlStateManager.Profile.TRANSPARENT_MODEL);
+            if (isGhost) {
+                GL11.glDisable(GL11.GL_BLEND);
+                GL11.glAlphaFunc(GL11.GL_GREATER, 0.1F);
+                GL11.glPopMatrix();
+                GL11.glDepthMask(true);
+            }
         }
 
-        if (this.renderOutlines) {
-            if (scoreTeamColor) this.unsetScoreTeamColor();
-            GlStateManager.disableOutlineMode();
-            GlStateManager.disableColorMaterial();
-        }
-
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-        GlStateManager.enableTexture2D();
-        GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
-        GlStateManager.enableCull();
-        GlStateManager.popMatrix();
-        super.doRender(entity, x, y, z, yaw, partialTick);
-    }
-
-    protected boolean isVisible(Entity livingEntityIn) {
-        return !livingEntityIn.isInvisible() || this.renderOutlines;
-    }
-
-    /**
-     * {@link net.minecraft.client.renderer.entity.RenderLivingBase#setScoreTeamColor(EntityLivingBase)}
-     */
-    @SuppressWarnings("JavadocReference")
-    protected boolean setScoreTeamColor(Entity entityIn) {
-        GlStateManager.disableLighting();
-        GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-        GlStateManager.disableTexture2D();
-        GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
-        return true;
-    }
-
-    /**
-     * {@link net.minecraft.client.renderer.entity.RenderLivingBase#unsetScoreTeamColor()}
-     */
-    @SuppressWarnings("JavadocReference")
-    protected void unsetScoreTeamColor() {
-        GlStateManager.enableLighting();
-        GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-        GlStateManager.enableTexture2D();
-        GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
+        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+        OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
+        GL11.glEnable(GL11.GL_CULL_FACE);
+        GL11.glPopMatrix();
     }
 
     @Override
@@ -155,7 +135,13 @@ public class GeoProjectilesRenderer<T extends Entity, E extends IAnimatable> ext
 
     @Nullable
     @Override
-    public ResourceLocation getEntityTexture(@Nonnull T instance) {
+    public ResourceLocation getEntityTexture(@Nonnull Entity instance) {
+        return this.getTextureLocation((T) instance);
+    }
+
+    @Nullable
+    @Override
+    public ResourceLocation getTextureLocation(@Nonnull T instance) {
         return this.modelProvider.getTextureLocation(this.animatable);
     }
 }

@@ -1,32 +1,27 @@
 package com.elfmcys.yesstevemodel.client.input;
 
-import com.elfmcys.yesstevemodel.YesSteveModel;
+import com.elfmcys.yesstevemodel.client.compat.KeyCompat;
 import com.elfmcys.yesstevemodel.network.NetworkHandler;
 import com.elfmcys.yesstevemodel.network.message.SetPlayAnimation;
 import com.google.common.collect.Lists;
+import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.InputEvent;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraftforge.client.settings.KeyConflictContext;
-import net.minecraftforge.client.settings.KeyModifier;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
-import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Keyboard;
 
 import java.util.List;
 
-@Mod.EventBusSubscriber(value = Side.CLIENT, modid = YesSteveModel.MOD_ID)
 public class ExtraAnimationKey {
     public static final List<KeyBinding> EXTRA_ANIMATION_KEYS = Lists.newArrayList();
 
     public static void registerKeyBinding() {
         for (int i = 0; i <= 7; i++) {
             String name = String.format("key.yes_steve_model.extra_animation.%d.desc", i);
-            KeyBinding keyMapping = new KeyBinding(
+            KeyBinding keyMapping = KeyCompat.createKeyBinding(
                     name,
-                    KeyConflictContext.IN_GAME,
-                    KeyModifier.NONE,
+                    KeyCompat.ConflictContext.IN_GAME,
+                    KeyCompat.Modifier.NONE,
                     Keyboard.KEY_NONE,
                     "key.category.yes_steve_model"
             );
@@ -36,7 +31,7 @@ public class ExtraAnimationKey {
     }
 
     @SubscribeEvent
-    public static void onKeyboardInput(InputEvent.KeyInputEvent event) {
+    public void onKeyboardInput(InputEvent.KeyInputEvent event) {
         for (KeyBinding key : EXTRA_ANIMATION_KEYS) {
             if (key.isPressed()) {
                 NetworkHandler.CHANNEL.sendToServer(new SetPlayAnimation(EXTRA_ANIMATION_KEYS.indexOf(key)));

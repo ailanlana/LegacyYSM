@@ -10,25 +10,23 @@ import com.elfmcys.yesstevemodel.event.CapabilityEvent;
 import com.elfmcys.yesstevemodel.geckolib3.geo.raw.pojo.ExtraInfo;
 import com.elfmcys.yesstevemodel.util.ModelIdUtil;
 import com.elfmcys.yesstevemodel.util.RenderUtil;
+import com.elfmcys.yesstevemodel.util.ResourceUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import cpw.mods.fml.common.Loader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiInventory;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.SoundEvents;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.common.Loader;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -46,7 +44,7 @@ public class PlayerModelScreen extends Screen {
     private int y;
 
     public PlayerModelScreen() {
-        this(Minecraft.getMinecraft().player);
+        this(Minecraft.getMinecraft().thePlayer);
     }
 
     public PlayerModelScreen(EntityPlayer player) {
@@ -62,7 +60,7 @@ public class PlayerModelScreen extends Screen {
         if (this.category == Category.AUTH) {
             CapabilityEvent.getAuthModelsCap(this.player).ifPresent(cap -> {
                 for (ResourceLocation modelId : ClientModelManager.MODELS.keySet()) {
-                    if (cap.containModel(modelId) || !ClientModelManager.AUTH_MODELS.contains(modelId.getPath())) {
+                    if (cap.containModel(modelId) || !ClientModelManager.AUTH_MODELS.contains(modelId.getResourcePath())) {
                         this.models.put(modelId, ClientModelManager.MODELS.get(modelId));
                     }
                 }
@@ -80,10 +78,10 @@ public class PlayerModelScreen extends Screen {
 
         if (this.textField != null) {
             String search = this.textField.getText().toLowerCase(Locale.US);
-            this.models.entrySet().removeIf(next -> !next.getKey().getPath().contains(search));
+            this.models.entrySet().removeIf(next -> !next.getKey().getResourcePath().contains(search));
         }
         this.modelOrderList = Lists.newArrayList(this.models.keySet());
-        this.modelOrderList.sort(ResourceLocation::compareTo);
+        this.modelOrderList.sort(ResourceUtil.COMPARATOR);
         this.maxPage = (this.models.size() - 1) / 10;
     }
 
@@ -102,7 +100,7 @@ public class PlayerModelScreen extends Screen {
             perText = this.textField.getText();
             focus = this.textField.isFocused();
         }
-        this.textField = new GuiTextField(0, this.fontRenderer, this.x + 144, this.y + 6, 140, 16);
+        this.textField = new GuiTextField(this.fontRendererObj, this.x + 144, this.y + 6, 140, 16);
         this.textField.setText(perText);
         this.textField.setTextColor(0xF3EFE0);
         this.textField.setFocused(focus);
@@ -119,7 +117,7 @@ public class PlayerModelScreen extends Screen {
         }).setTooltips("gui.yes_steve_model.model.texture"));
         this.addButton(new StarButton(this.x + 110, this.y + 5));
 
-        this.addButton(new ConfigCheckBox(this.x + 5, this.y - 22, "show_model_id_first", this.fontRenderer,
+        this.addButton(new ConfigCheckBox(this.x + 5, this.y - 22, "show_model_id_first", this.fontRendererObj,
                 GeneralConfig.SHOW_MODEL_ID_FIRST, value -> GeneralConfig.SHOW_MODEL_ID_FIRST = value) {
             @Override
             public void onPress() {
@@ -185,7 +183,7 @@ public class PlayerModelScreen extends Screen {
             int xStart = this.x + 143 + 55 * (i % 5);
             int yStart = this.y + 28 + 93 * (i / 5);
             CapabilityEvent.getAuthModelsCap(this.player).ifPresent(cap -> {
-                if (ClientModelManager.AUTH_MODELS.contains(id.getPath()) && !cap.containModel(id)) {
+                if (ClientModelManager.AUTH_MODELS.contains(id.getResourcePath()) && !cap.containModel(id)) {
                     this.addButton(new ModelButton(xStart, yStart, true, Pair.of(id, this.models.get(id)), ClientModelManager.METADATA.get(ModelIdUtil.getInfoId(id)), this.player));
                 } else {
                     this.addButton(new ModelButton(xStart, yStart, false, Pair.of(id, this.models.get(id)), ClientModelManager.METADATA.get(ModelIdUtil.getInfoId(id)), this.player));
@@ -203,35 +201,36 @@ public class PlayerModelScreen extends Screen {
         this.drawGradientRect(this.x + 351, this.y + 7, this.x + 352, this.y + 21, 0xFF_F3EFE0, 0xFF_F3EFE0);
 
         this.textField.drawTextBox();
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderUtil.scissor(this.x + 5, this.y + 54, 125, 146);
-        GuiInventory.drawEntityOnScreen(this.x + 67, this.y + 195, 64, this.x + 67 - mouseX, this.y + 190 - 95 - mouseY, this.player);
+        // drawEntityOnScreen Args: x, y, scale, mouseX, mouseY, entity
+        GuiInventory.func_147046_a(this.x + 67, this.y + 195, 64, this.x + 67 - mouseX, this.y + 190 - 95 - mouseY, this.player);
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
 
         CapabilityEvent.getModelInfoCap(this.player).ifPresent(cap -> {
-            String modelName = cap.getModelId().getPath();
+            String modelName = cap.getModelId().getResourcePath();
             final ExtraInfo extraInfo = ClientModelManager.EXTRA_INFO.get(ModelIdUtil.getInfoId(cap.getModelId()));
             if (extraInfo != null && extraInfo.getName() != null && !extraInfo.getName().isEmpty()) {
                 modelName = extraInfo.getName();
             }
-            List<String> modelNameSplit = this.fontRenderer.listFormattedStringToWidth(modelName, 125);
+            List<String> modelNameSplit = this.fontRendererObj.listFormattedStringToWidth(modelName, 125);
             int lineY = this.y + 205;
             for (String line : modelNameSplit) {
-                int nameWidth = this.fontRenderer.getStringWidth(line);
-                this.drawString(this.fontRenderer, line, this.x + (135 - nameWidth) / 2, lineY, 0xF3EFE0);
+                int nameWidth = this.fontRendererObj.getStringWidth(line);
+                this.drawString(this.fontRendererObj, line, this.x + (135 - nameWidth) / 2, lineY, 0xF3EFE0);
                 lineY += 10;
             }
         });
 
         if (this.textField.getText().isEmpty() && !this.textField.isFocused()) {
-            this.drawString(this.fontRenderer, TextFormatting.ITALIC + I18n.format("gui.yes_steve_model.search"), this.x + 148, this.y + 10, 0x777777);
+            this.drawString(this.fontRendererObj, EnumChatFormatting.ITALIC + I18n.format("gui.yes_steve_model.search"), this.x + 148, this.y + 10, 0x777777);
         }
 
         String pageInfo = String.format("%d/%d", this.page + 1, this.maxPage + 1);
-        this.drawString(this.fontRenderer, pageInfo, this.x + 138 + (282 - this.fontRenderer.getStringWidth(pageInfo)) / 2, this.y + 223 - this.fontRenderer.FONT_HEIGHT / 2, 0xF3EFE0);
+        this.drawString(this.fontRendererObj, pageInfo, this.x + 138 + (282 - this.fontRendererObj.getStringWidth(pageInfo)) / 2, this.y + 223 - this.fontRendererObj.FONT_HEIGHT / 2, 0xF3EFE0);
 
         String debugInfo = String.format("%s-%s", Loader.MC_VERSION, Tags.VERSION);
-        this.drawString(this.fontRenderer, TextFormatting.DARK_GRAY + debugInfo, this.x + 2, this.y + 226, 0xFFFFFFFF);
+        this.drawString(this.fontRendererObj, EnumChatFormatting.DARK_GRAY + debugInfo, this.x + 2, this.y + 226, 0xFFFFFFFF);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
         this.buttonList.stream().filter(r -> r instanceof FlatColorButton)
@@ -255,13 +254,13 @@ public class PlayerModelScreen extends Screen {
     }
 
     @Override
-    public void mouseClicked(int mouseX, int mouseY, int button) throws IOException {
+    public void mouseClicked(int mouseX, int mouseY, int button) {
         this.textField.mouseClicked(mouseX, mouseY, button);
         super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
-    public void keyTyped(char codePoint, int modifiers) throws IOException {
+    public void keyTyped(char codePoint, int modifiers) {
         if (this.textField == null) {
             return;
         }
@@ -297,12 +296,12 @@ public class PlayerModelScreen extends Screen {
     private void scrollPage(float delta) {
         if (delta > 0 && this.page > 0) {
             this.page--;
-            this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            this.mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
             this.refreshGui();
         }
         if (delta < 0 && this.page < this.maxPage) {
             this.page++;
-            this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            this.mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
             this.refreshGui();
         }
     }

@@ -1,21 +1,22 @@
 package com.elfmcys.yesstevemodel.network.message;
 
 import com.elfmcys.yesstevemodel.event.CapabilityEvent;
+import com.elfmcys.yesstevemodel.network.message.util.ExtendedBuffer;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
-public class SyncArrowModel implements IPacketBufferMessage {
+public class SyncArrowModel implements IExtendedBufferMessage {
     private int entityId;
     private String modelId;
 
+    @SuppressWarnings("unused")
     public SyncArrowModel() {
     }
 
@@ -25,15 +26,15 @@ public class SyncArrowModel implements IPacketBufferMessage {
     }
 
     @Override
-    public void toBytes(PacketBuffer buf) {
-        buf.writeVarInt(this.entityId);
-        buf.writeString(this.modelId);
+    public void toBytes(ExtendedBuffer buf) {
+        buf.writeVarIntToBuffer(this.entityId);
+        buf.writeStringToBuffer(this.modelId);
     }
 
     @Override
-    public void fromBytes(PacketBuffer buf) {
-        this.entityId = buf.readVarInt();
-        this.modelId = buf.readString(Short.MAX_VALUE);
+    public void fromBytes(ExtendedBuffer buf) {
+        this.entityId = buf.readVarIntFromBuffer();
+        this.modelId = buf.readStringFromBuffer();
     }
 
     public static class Handler implements IMessageHandler<SyncArrowModel, IMessage> {
@@ -49,11 +50,9 @@ public class SyncArrowModel implements IPacketBufferMessage {
         @SideOnly(Side.CLIENT)
         private static void handleCapability(SyncArrowModel message) {
             Minecraft mc = Minecraft.getMinecraft();
-            mc.addScheduledTask(() -> {
-                if (mc.world != null && mc.world.getEntityByID(message.entityId) instanceof EntityArrow arrow) {
-                    CapabilityEvent.getArrowModelCap(arrow).ifPresent(cap -> cap.setModelId(message.modelId));
-                }
-            });
+            if (mc.thePlayer != null && mc.theWorld.getEntityByID(message.entityId) instanceof EntityArrow arrow) {
+                CapabilityEvent.getArrowModelCap(arrow).ifPresent(cap -> cap.setModelId(message.modelId));
+            }
         }
     }
 }

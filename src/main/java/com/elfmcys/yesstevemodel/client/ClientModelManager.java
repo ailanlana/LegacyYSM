@@ -21,6 +21,7 @@ import com.elfmcys.yesstevemodel.model.format.Type;
 import com.elfmcys.yesstevemodel.model.format.access.FolderModelAccess;
 import com.elfmcys.yesstevemodel.network.NetworkHandler;
 import com.elfmcys.yesstevemodel.network.message.SyncModelFiles;
+import com.elfmcys.yesstevemodel.util.GsonUtils;
 import com.elfmcys.yesstevemodel.util.ModelIdUtil;
 import com.elfmcys.yesstevemodel.util.ObjectStreamUtil;
 import com.elfmcys.yesstevemodel.util.ThreadTools;
@@ -31,9 +32,8 @@ import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.JsonException;
-import net.minecraft.util.JsonUtils;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextFormatting;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.lang3.StringUtils;
@@ -89,7 +89,7 @@ public class ClientModelManager {
                 if (rawModel.getFormatVersion() == FormatVersion.VERSION_1_12_0) {
                     RawGeometryTree rawGeometryTree = RawGeometryTree.parseHierarchy(rawModel);
                     ResourceLocation partId = ModelIdUtil.getSubModelId(modelId, partName);
-                    GeoModel geoModel = GeoBuilder.getGeoBuilder(partId.getNamespace()).constructGeoModel(rawGeometryTree);
+                    GeoModel geoModel = GeoBuilder.getGeoBuilder(partId.getResourceDomain()).constructGeoModel(rawGeometryTree);
                     if ("main".equals(partName)) {
                         SCALE_INFO.put(partId, Pair.of(rawGeometryTree.properties.getHeightScale(), rawGeometryTree.properties.getWidthScale()));
                         addExtraInfo(modelId, rawGeometryTree.properties.getExtraInfo());
@@ -124,11 +124,8 @@ public class ClientModelManager {
     }
 
     private static void registerTexture(ResourceLocation textureId, byte[] data) {
-        // 确保主线程上传
-        final Minecraft mc = Minecraft.getMinecraft();
-        mc.addScheduledTask(() -> {
-            mc.getTextureManager().loadTexture(textureId, new OuterFileTexture(data));
-        });
+        // 1.7.10 已经在主线程了
+        Minecraft.getMinecraft().getTextureManager().loadTexture(textureId, new OuterFileTexture(data));
     }
 
     private static void registerAnimations(ResourceLocation mainId, Map<String, byte[]> mapData) {
@@ -159,7 +156,7 @@ public class ClientModelManager {
     private static AnimationFile getAnimationFile(String file) {
         AnimationFile animationFile = new AnimationFile();
         MolangParser parser = GeckoLibCache.getInstance().parser;
-        JsonObject jsonObject = JsonUtils.fromJson(YesSteveModel.GSON, file, JsonObject.class, false);
+        JsonObject jsonObject = GsonUtils.fromJson(YesSteveModel.GSON, file, JsonObject.class, false);
         if (jsonObject != null) {
             for (Map.Entry<String, JsonElement> entry : JsonAnimationUtils.getAnimations(jsonObject)) {
                 String animationName = entry.getKey();
@@ -215,7 +212,7 @@ public class ClientModelManager {
         SyncModelFiles syncModelFiles = new SyncModelFiles(md5Info);
         ThreadTools.THREAD_POOL.submit(() -> {
             try {
-                while (Minecraft.getMinecraft().getConnection() == null) {
+                while (Minecraft.getMinecraft().thePlayer == null || Minecraft.getMinecraft().thePlayer.sendQueue == null) {
                     Thread.sleep(500);
                 }
                 NetworkHandler.CHANNEL.sendToServer(syncModelFiles);
@@ -246,9 +243,9 @@ public class ClientModelManager {
         EXTRA_INFO.put(infoId, extraInfo);
         METADATA.put(infoId, readMetaData(extraInfo));
         if (extraInfo.getFree()) {
-            AUTH_MODELS.remove(modelId.getPath());
+            AUTH_MODELS.remove(modelId.getResourcePath());
         }
-        if (modelId.getPath().equals("default") && extraInfo.getPreviewAnimation() != null) {
+        if (modelId.getResourcePath().equals("default") && extraInfo.getPreviewAnimation() != null) {
             DEFAULT_ANIMATION_FILE.animations().remove(extraInfo.getPreviewAnimation());
         }
     }
@@ -259,16 +256,16 @@ public class ClientModelManager {
             return null;
         }
         List<String> component = Lists.newArrayList();
-        component.add(TextFormatting.GOLD + extraInfo.getName());
+        component.add(EnumChatFormatting.GOLD + extraInfo.getName());
         if (extraInfo.getTips() != null && StringUtils.isNoneBlank(extraInfo.getTips())) {
             String[] split = extraInfo.getTips().split("\n");
-            Arrays.stream(split).forEach(s -> component.add(TextFormatting.GRAY + I18n.format(s)));
+            Arrays.stream(split).forEach(s -> component.add(EnumChatFormatting.GRAY + I18n.format(s)));
         }
         if (extraInfo.getAuthors() != null && extraInfo.getAuthors().length != 0) {
-            component.add(I18n.format("gui.yes_steve_model.model.authors", TextFormatting.RESET + StringUtils.join(extraInfo.getAuthors(), "丨")));
+            component.add(I18n.format("gui.yes_steve_model.model.authors", EnumChatFormatting.RESET + StringUtils.join(extraInfo.getAuthors(), "丨")));
         }
         if (StringUtils.isNoneBlank(extraInfo.getLicense())) {
-            component.add(I18n.format("gui.yes_steve_model.model.license", TextFormatting.RESET + extraInfo.getLicense()));
+            component.add(I18n.format("gui.yes_steve_model.model.license", EnumChatFormatting.RESET + extraInfo.getLicense()));
         }
         return component;
     }

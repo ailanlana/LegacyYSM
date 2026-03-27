@@ -1,6 +1,7 @@
 package com.elfmcys.yesstevemodel.command.sub;
 
 import com.elfmcys.yesstevemodel.YesSteveModel;
+import com.elfmcys.yesstevemodel.command.CommandUtils;
 import com.elfmcys.yesstevemodel.command.argument.ModelsArgument;
 import com.elfmcys.yesstevemodel.model.ServerModelManager;
 import com.elfmcys.yesstevemodel.util.YesModelUtils;
@@ -8,12 +9,9 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.ChatComponentTranslation;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -24,13 +22,13 @@ public class ExportCommand extends CommandBase {
 
     @Nonnull
     @Override
-    public String getName() {
+    public String getCommandName() {
         return EXPORT_NAME;
     }
 
     @Nonnull
     @Override
-    public String getUsage(@Nonnull ICommandSender sender) {
+    public String getCommandUsage(@Nonnull ICommandSender sender) {
         return "commands.yes_steve_model.export.usage";
     }
 
@@ -40,8 +38,8 @@ public class ExportCommand extends CommandBase {
     }
 
     @Override
-    public void execute(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args) throws CommandException {
-        if (args.length != 1) throw new WrongUsageException(this.getUsage(sender));
+    public void processCommand(@Nonnull ICommandSender sender, @Nonnull String[] args) throws CommandException {
+        if (args.length != 1) throw new WrongUsageException(this.getCommandUsage(sender));
         this.exportModel(sender, args[0]);
     }
 
@@ -50,7 +48,7 @@ public class ExportCommand extends CommandBase {
         if (builtinFolder.isDirectory()) {
             try {
                 YesModelUtils.export(builtinFolder);
-                notifyCommandListener(sender, this, "commands.yes_steve_model.export.success",
+                CommandUtils.notifyCommandListener(sender, this, "commands.yes_steve_model.export.success",
                         YesSteveModel.MOD_ID, modelName);
                 return;
             } catch (IOException e) {
@@ -62,7 +60,7 @@ public class ExportCommand extends CommandBase {
         if (customFolder.isDirectory()) {
             try {
                 YesModelUtils.export(customFolder);
-                notifyCommandListener(sender, this, "commands.yes_steve_model.export.success",
+                CommandUtils.notifyCommandListener(sender, this, "commands.yes_steve_model.export.success",
                         YesSteveModel.MOD_ID, modelName);
                 return;
             } catch (IOException e) {
@@ -74,7 +72,7 @@ public class ExportCommand extends CommandBase {
         if (authFolder.isDirectory()) {
             try {
                 YesModelUtils.export(authFolder);
-                notifyCommandListener(sender, this, "commands.yes_steve_model.export.success",
+                CommandUtils.notifyCommandListener(sender, this, "commands.yes_steve_model.export.success",
                         YesSteveModel.MOD_ID, modelName);
                 return;
             } catch (IOException e) {
@@ -82,12 +80,12 @@ public class ExportCommand extends CommandBase {
             }
         }
 
-        sender.sendMessage(new TextComponentTranslation("commands.yes_steve_model.export.not_exist", modelName));
+        sender.addChatMessage(new ChatComponentTranslation("commands.yes_steve_model.export.not_exist", modelName));
     }
 
     @Nonnull
     @Override
-    public List<String> getTabCompletions(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args, @Nullable BlockPos targetPos) {
+    public List<String> addTabCompletionOptions(@Nonnull ICommandSender sender, @Nonnull String[] args) {
         return args.length == 1 ?
                 getListOfStringsMatchingLastWord(args, ModelsArgument.listSuggestions()) :
                 Collections.emptyList();

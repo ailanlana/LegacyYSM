@@ -1,10 +1,10 @@
 package com.elfmcys.yesstevemodel.event.api;
 
 import com.elfmcys.yesstevemodel.client.entity.CustomPlayerEntity;
+import cpw.mods.fml.common.eventhandler.Cancelable;
+import cpw.mods.fml.common.eventhandler.Event;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.eventhandler.Cancelable;
-import net.minecraftforge.fml.common.eventhandler.Event;
 
 @Cancelable
 public class SpecialPlayerRenderEvent extends Event {

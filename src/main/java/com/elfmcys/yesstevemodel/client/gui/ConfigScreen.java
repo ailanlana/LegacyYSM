@@ -24,17 +24,17 @@ public class ConfigScreen extends Screen {
 
         this.addButton(new FlatColorButton(x + 5, y, 80, 18, I18n.format("gui.yes_steve_model.model.return"), (b) -> this.mc.displayGuiScreen(this.parent)));
 
-        this.addButton(new ConfigCheckBox(x + 5, y + 25, "config.disable_self_model", this.fontRenderer,
+        this.addButton(new ConfigCheckBox(x + 5, y + 25, "config.disable_self_model", this.fontRendererObj,
                 GeneralConfig.DISABLE_SELF_MODEL, (value) -> GeneralConfig.DISABLE_SELF_MODEL = value));
-        this.addButton(new ConfigCheckBox(x + 5, y + 47, "config.disable_other_model", this.fontRenderer,
+        this.addButton(new ConfigCheckBox(x + 5, y + 47, "config.disable_other_model", this.fontRendererObj,
                 GeneralConfig.DISABLE_OTHER_MODEL, (value) -> GeneralConfig.DISABLE_OTHER_MODEL = value));
-        this.addButton(new ConfigCheckBox(x + 5, y + 69, "config.print_animation_roulette_msg", this.fontRenderer,
+        this.addButton(new ConfigCheckBox(x + 5, y + 69, "config.print_animation_roulette_msg", this.fontRendererObj,
                 GeneralConfig.PRINT_ANIMATION_ROULETTE_MSG, (value) -> GeneralConfig.PRINT_ANIMATION_ROULETTE_MSG = value));
-        this.addButton(new ConfigCheckBox(x + 5, y + 91, "config.disable_self_hands", this.fontRenderer,
+        this.addButton(new ConfigCheckBox(x + 5, y + 91, "config.disable_self_hands", this.fontRendererObj,
                 GeneralConfig.DISABLE_SELF_HANDS, (value) -> GeneralConfig.DISABLE_SELF_HANDS = value));
-        this.addButton(new ConfigCheckBox(x + 5, y + 112, "config.disable_player_render", this.fontRenderer,
+        this.addButton(new ConfigCheckBox(x + 5, y + 112, "config.disable_player_render", this.fontRendererObj,
                 ExtraPlayerScreenConfig.DISABLE_PLAYER_RENDER, (value) -> ExtraPlayerScreenConfig.DISABLE_PLAYER_RENDER = value));
-        this.addButton(new ConfigCheckBox(x + 5, y + 134, "config.disable_arrows_model", this.fontRenderer,
+        this.addButton(new ConfigCheckBox(x + 5, y + 134, "config.disable_arrows_model", this.fontRendererObj,
                 GeneralConfig.DISABLE_ARROWS_MODEL, (value) -> GeneralConfig.DISABLE_ARROWS_MODEL = value));
     }
 

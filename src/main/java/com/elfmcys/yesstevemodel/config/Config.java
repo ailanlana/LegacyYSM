@@ -4,10 +4,10 @@ import com.elfmcys.yesstevemodel.client.config.ExtraPlayerScreenConfig;
 import com.elfmcys.yesstevemodel.client.config.GeneralConfig;
 import com.elfmcys.yesstevemodel.config.util.ConfigBuilder;
 import com.elfmcys.yesstevemodel.config.util.IFormatter;
+import cpw.mods.fml.client.config.IConfigElement;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fml.client.config.IConfigElement;
-import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -57,6 +57,7 @@ public final class Config {
         return config;
     }
 
+    @SuppressWarnings("rawtypes")
     @Nonnull
     public static List<IConfigElement> getRootConfigElements() {
         return config.getCategoryNames().stream()

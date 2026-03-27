@@ -7,7 +7,6 @@ package com.elfmcys.yesstevemodel.geckolib3.util;
 
 import com.elfmcys.yesstevemodel.geckolib3.geo.IGeoRenderer;
 import com.elfmcys.yesstevemodel.geckolib3.model.provider.GeoModelProvider;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
@@ -24,14 +23,14 @@ public class AnimationUtils {
     /**
      * 获取实体的 Renderer
      */
-    public static <T extends Entity> Render<T> getRenderer(T entity) {
-        RenderManager renderManager = Minecraft.getMinecraft().getRenderManager();
+    public static <T extends Entity> Render getRenderer(T entity) {
+        RenderManager renderManager = RenderManager.instance;
         return renderManager.getEntityRenderObject(entity);
     }
 
     @SuppressWarnings("rawtypes")
     public static <T extends Entity> GeoModelProvider getGeoModelForEntity(T entity) {
-        Render<T> entityRenderer = getRenderer(entity);
+        Render entityRenderer = getRenderer(entity);
         if (entityRenderer instanceof IGeoRenderer geoRenderer) {
             return geoRenderer.getGeoModelProvider();
         }

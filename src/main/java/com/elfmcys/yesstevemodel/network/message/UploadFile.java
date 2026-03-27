@@ -2,23 +2,23 @@ package com.elfmcys.yesstevemodel.network.message;
 
 import com.elfmcys.yesstevemodel.model.ServerModelManager;
 import com.elfmcys.yesstevemodel.network.NetworkHandler;
+import com.elfmcys.yesstevemodel.network.message.util.ExtendedBuffer;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import org.apache.commons.io.FileUtils;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class UploadFile implements IPacketBufferMessage {
+public class UploadFile implements IExtendedBufferMessage {
     private String name;
     private byte[] fileBytes;
     private Dir dir;
 
+    @SuppressWarnings("unused")
     public UploadFile() {
     }
 
@@ -29,27 +29,25 @@ public class UploadFile implements IPacketBufferMessage {
     }
 
     @Override
-    public void toBytes(PacketBuffer buf) {
-        buf.writeString(this.name);
-        buf.writeByteArray(this.fileBytes);
-        buf.writeEnumValue(this.dir);
+    public void toBytes(ExtendedBuffer buf) {
+        buf.writeStringToBuffer(this.name);
+        buf.writeByteArrayToBuffer(this.fileBytes);
+        buf.writeEnumValueToBuffer(this.dir);
     }
 
     @Override
-    public void fromBytes(PacketBuffer buf) {
-        this.name = buf.readString(Short.MAX_VALUE);
-        this.fileBytes = buf.readByteArray();
-        this.dir = buf.readEnumValue(Dir.class);
+    public void fromBytes(ExtendedBuffer buf) {
+        this.name = buf.readStringFromBuffer();
+        this.fileBytes = buf.readByteArrayFromBuffer();
+        this.dir = buf.readEnumValueFromBuffer(Dir.class);
     }
 
     public static class Handler implements IMessageHandler<UploadFile, IMessage> {
         @Nullable
         @Override
         public IMessage onMessage(UploadFile message, MessageContext ctx) {
-            if (ctx.side.isServer() && ctx.getServerHandler().player.canUseCommand(4, "")) {
-                FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> {
-                    writeFile(message, ctx.getServerHandler().player);
-                });
+            if (ctx.side.isServer() && ctx.getServerHandler().playerEntity.canCommandSenderUseCommand(4, "")) {
+                writeFile(message, ctx.getServerHandler().playerEntity);
             }
             return null;
         }

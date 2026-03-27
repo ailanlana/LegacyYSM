@@ -1,6 +1,5 @@
 package com.elfmcys.yesstevemodel.client.animation.condition;
 
-import com.elfmcys.yesstevemodel.util.ResourceUtil;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -11,7 +10,7 @@ import java.util.List;
 
 public abstract class AbstractConditionEntity {
     private static final String EMPTY = "";
-    private final List<ResourceLocation> idTest = Lists.newArrayList();
+    private final List<String> idTest = Lists.newArrayList();
     //private final List<ResourceLocation> tagTest = Lists.newArrayList();
     private final String idPre;
     //private final String tagPre;
@@ -27,8 +26,8 @@ public abstract class AbstractConditionEntity {
             return;
         }
         String substring = name.substring(preSize);
-        if (name.startsWith(this.idPre) && ResourceUtil.isValidResourceLocation(substring)) {
-            this.idTest.add(new ResourceLocation(substring));
+        if (name.startsWith(this.idPre)) {
+            this.idTest.add(new ResourceLocation(substring).getResourcePath());
             //return;
         }
 //        if (name.startsWith(this.tagPre) && ResourceUtil.isValidResourceLocation(substring)) {
@@ -60,7 +59,7 @@ public abstract class AbstractConditionEntity {
         if (this.idTest.isEmpty()) {
             return EMPTY;
         }
-        ResourceLocation registryName = EntityList.getKey(entity);
+        String registryName = EntityList.getEntityString(entity);
         if (registryName == null) {
             return EMPTY;
         }

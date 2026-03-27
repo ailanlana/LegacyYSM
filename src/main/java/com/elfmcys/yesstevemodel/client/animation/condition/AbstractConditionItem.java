@@ -1,11 +1,11 @@
 package com.elfmcys.yesstevemodel.client.animation.condition;
 
-import com.elfmcys.yesstevemodel.client.compat.ExtraAction;
-import com.elfmcys.yesstevemodel.util.ResourceUtil;
+import com.elfmcys.yesstevemodel.client.compat.Hand;
+import com.elfmcys.yesstevemodel.client.compat.PotionCompat;
 import com.google.common.collect.Lists;
+import cpw.mods.fml.common.registry.GameData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.*;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.lang3.tuple.Pair;
@@ -45,9 +45,7 @@ public abstract class AbstractConditionItem {
         }
         String substring = name.substring(this.preSize);
         if (name.startsWith(this.idPre)) {
-            if (ResourceUtil.isValidResourceLocation(substring)) {
-                this.idTest.add(new ResourceLocation(substring));
-            }
+            this.idTest.add(new ResourceLocation(substring));
             return;
         }
         if (name.startsWith(this.orePre)) {
@@ -76,8 +74,8 @@ public abstract class AbstractConditionItem {
         }
     }
 
-    public String doTest(EntityPlayer player, EnumHand hand) {
-        if (player.getHeldItem(hand).isEmpty()) {
+    public String doTest(EntityPlayer player, Hand hand) {
+        if (hand.getHeldItem(player) == null) {
             return EMPTY;
         }
         String result;
@@ -92,26 +90,27 @@ public abstract class AbstractConditionItem {
         return EMPTY;
     }
 
-    private String doIdTest(EntityPlayer player, EnumHand hand) {
+    private String doIdTest(EntityPlayer player, Hand hand) {
         if (this.idTest.isEmpty()) {
             return EMPTY;
         }
-        ItemStack itemInHand = player.getHeldItem(hand);
-        ResourceLocation registryName = itemInHand.getItem().getRegistryName();
-        if (registryName == null) {
+        ItemStack itemInHand = hand.getHeldItem(player);
+        String tempRegistryName = GameData.getItemRegistry().getNameForObject(itemInHand.getItem());
+        if (tempRegistryName == null) {
             return EMPTY;
         }
+        ResourceLocation registryName = new ResourceLocation(tempRegistryName);
         if (this.idTest.contains(registryName)) {
             return this.idPre + registryName;
         }
         return EMPTY;
     }
 
-    private String doOreTest(EntityPlayer player, EnumHand hand) {
+    private String doOreTest(EntityPlayer player, Hand hand) {
         if (this.oreTest.isEmpty()) {
             return EMPTY;
         }
-        ItemStack itemInHand = player.getHeldItem(hand);
+        ItemStack itemInHand = hand.getHeldItem(player);
         for (int id : OreDictionary.getOreIDs(itemInHand)) {
             String name = OreDictionary.getOreName(id);
             if ("Unknown".equals(name)) continue;
@@ -123,11 +122,11 @@ public abstract class AbstractConditionItem {
     }
 
     // TODO: Tag 转矿词系统，道阻且长
-//    private String doTagTest(EntityPlayer player, EnumHand hand) {
+//    private String doTagTest(EntityPlayer player, Hand hand) {
 //        if (this.tagTest.isEmpty()) {
 //            return EMPTY;
 //        }
-//        Item itemInHand = player.getHeldItem(hand).getItem();
+//        Item itemInHand = hand.getHeldItem(player).getItem();
 //        return this.tagTest.stream().filter(itemTagKey -> {
 //            ITag<Item> tag = ItemTags.getAllTags().getTag(itemTagKey);
 //            if (tag != null) {
@@ -137,11 +136,11 @@ public abstract class AbstractConditionItem {
 //        }).findFirst().map(itemTagKey -> this.tagPre + itemTagKey).orElse(EMPTY);
 //    }
 
-    private String doExtraTest(EntityPlayer player, EnumHand hand) {
+    private String doExtraTest(EntityPlayer player, Hand hand) {
         if (this.extraTest.isEmpty()) {
             return EMPTY;
         }
-        ItemStack stack = player.getHeldItem(hand);
+        ItemStack stack = hand.getHeldItem(player);
         for (Pair<String, IExtraMatcher> pair : this.extraTest) {
             String key = pair.getLeft();
             // 同名或同类均可
@@ -170,18 +169,18 @@ public abstract class AbstractConditionItem {
                 stack.getItem() instanceof ItemSpade);
         EXTRA_MATCHERS.put("hoe", (player, stack) ->
                 stack.getItem() instanceof ItemHoe);
-        EXTRA_MATCHERS.put("shield", (player, stack) ->
-                stack.getItem() instanceof ItemShield);
+//        EXTRA_MATCHERS.put("shield", (player, stack) ->
+//                stack.getItem() instanceof ItemShield);
         EXTRA_MATCHERS.put("throwable_potion", (player, stack) ->
-                stack.getItem() instanceof ItemSplashPotion || stack.getItem() instanceof ItemLingeringPotion);
+                PotionCompat.isThrowablePotion(stack));
         EXTRA_MATCHERS.put("fishing_rod", (player, stack) ->
                 stack.getItem() instanceof ItemFishingRod);
         EXTRA_MATCHERS.put("bow", (player, stack) ->
                 stack.getItem() instanceof ItemBow);
-        for (ExtraAction action : ExtraAction.values()) {
-            EXTRA_MATCHERS.put(action.name().toLowerCase(Locale.US), (player, stack) ->
-                    action.isAction(stack));
-        }
+//        for (ExtraAction action : ExtraAction.values()) {
+//            EXTRA_MATCHERS.put(action.name().toLowerCase(Locale.US), (player, stack) ->
+//                    action.isAction(stack));
+//        }
     }
 
     private static boolean isSameActionName(ItemStack stack, String action) {

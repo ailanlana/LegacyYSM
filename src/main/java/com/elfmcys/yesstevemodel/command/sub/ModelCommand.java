@@ -1,6 +1,7 @@
 package com.elfmcys.yesstevemodel.command.sub;
 
 import com.elfmcys.yesstevemodel.YesSteveModel;
+import com.elfmcys.yesstevemodel.command.CommandUtils;
 import com.elfmcys.yesstevemodel.command.argument.ModelsArgument;
 import com.elfmcys.yesstevemodel.command.argument.TexturesArgument;
 import com.elfmcys.yesstevemodel.event.CapabilityEvent;
@@ -11,17 +12,16 @@ import com.elfmcys.yesstevemodel.util.ModelIdUtil;
 import com.elfmcys.yesstevemodel.util.ResourceUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.FileFileFilter;
@@ -29,7 +29,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -49,13 +48,13 @@ public class ModelCommand extends CommandBase {
 
     @Nonnull
     @Override
-    public String getName() {
+    public String getCommandName() {
         return MODEL_NAME;
     }
 
     @Nonnull
     @Override
-    public String getUsage(@Nonnull ICommandSender sender) {
+    public String getCommandUsage(@Nonnull ICommandSender sender) {
         return "commands.yes_steve_model.model.usage";
     }
 
@@ -65,33 +64,33 @@ public class ModelCommand extends CommandBase {
     }
 
     @Override
-    public void execute(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args) throws CommandException {
-        if (args.length == 0) throw new WrongUsageException(this.getUsage(sender));
+    public void processCommand(@Nonnull ICommandSender sender, @Nonnull String[] args) throws CommandException {
+        if (args.length == 0) throw new WrongUsageException(this.getCommandUsage(sender));
         switch (args[0].toLowerCase()) {
             case RELOAD_NAME -> {
-                if (args.length != 1) throw new WrongUsageException(this.getUsage(sender));
-                this.reloadAllPack(server, sender);
+                if (args.length != 1) throw new WrongUsageException(this.getCommandUsage(sender));
+                this.reloadAllPack(sender);
             }
             case EXPORT_NAME -> {
-                if (args.length != 1) throw new WrongUsageException(this.getUsage(sender));
+                if (args.length != 1) throw new WrongUsageException(this.getCommandUsage(sender));
                 this.exportAllPackInfo(sender);
             }
             case SET_NAME -> {
                 switch (args.length) {
-                    case 4 -> this.setModel(server, sender, args[1], args[2], args[3], false);
-                    case 5 -> this.setModel(server, sender, args[1], args[2], args[3], parseBoolean(args[4]));
+                    case 4 -> this.setModel(sender, args[1], args[2], args[3], false);
+                    case 5 -> this.setModel(sender, args[1], args[2], args[3], parseBoolean(sender, args[4]));
                     default -> throw new WrongUsageException("commands.yes_steve_model.model.set.usage");
                 }
             }
-            default -> throw new WrongUsageException(this.getUsage(sender));
+            default -> throw new WrongUsageException(this.getCommandUsage(sender));
         }
     }
 
-    private void setModel(MinecraftServer server, ICommandSender sender, String targetsArg, String modelName, String textureName, boolean ignoreAuth) throws CommandException {
-        List<EntityPlayerMP> targets = getPlayers(server, sender, targetsArg);
+    private void setModel(ICommandSender sender, String targetsArg, String modelName, String textureName, boolean ignoreAuth) throws CommandException {
+        List<EntityPlayerMP> targets = CommandUtils.getPlayers(sender, targetsArg);
 
         if (!ServerModelManager.CACHE_NAME_INFO.containsKey(modelName)) {
-            sender.sendMessage(new TextComponentTranslation("commands.yes_steve_model.export.not_exist",
+            sender.addChatMessage(new ChatComponentTranslation("commands.yes_steve_model.export.not_exist",
                     modelName));
             return;
         }
@@ -105,8 +104,8 @@ public class ModelCommand extends CommandBase {
         if (ignoreAuth) {
             targets.forEach(player -> CapabilityEvent.getModelInfoCap(player).ifPresent(cap -> {
                 cap.setModelAndTexture(modelId, textureId);
-                notifyCommandListener(sender, this, "message.yes_steve_model.model.set.success",
-                        modelName, player.getName());
+                CommandUtils.notifyCommandListener(sender, this, "message.yes_steve_model.model.set.success",
+                        modelName, player.getCommandSenderName());
             }));
             return;
         }
@@ -115,34 +114,36 @@ public class ModelCommand extends CommandBase {
                 CapabilityEvent.getAuthModelsCap(player).ifPresent(authCap -> {
                     if (!ServerModelManager.AUTH_MODELS.contains(modelName) || authCap.containModel(modelId)) {
                         cap.setModelAndTexture(modelId, textureId);
-                        notifyCommandListener(sender, this, "message.yes_steve_model.model.set.success",
-                                modelName, player.getName());
+                        CommandUtils.notifyCommandListener(sender, this, "message.yes_steve_model.model.set.success",
+                                modelName, player.getCommandSenderName());
                     } else {
-                        notifyCommandListener(sender, this, "message.yes_steve_model.model.set.need_auth",
-                                modelName, player.getName());
+                        CommandUtils.notifyCommandListener(sender, this, "message.yes_steve_model.model.set.need_auth",
+                                modelName, player.getCommandSenderName());
                     }
                 })));
     }
 
     private void exportAllPackInfo(ICommandSender sender) {
         String infoText = GSON.toJson(ServerModelManager.CACHE_NAME_INFO);
-        sender.sendMessage(new TextComponentString(infoText));
+        sender.addChatMessage(new ChatComponentText(infoText));
     }
 
-    private void reloadAllPack(MinecraftServer server, ICommandSender sender) {
-        StopWatch watch = StopWatch.createStarted();
+    private void reloadAllPack(ICommandSender sender) {
+        StopWatch watch = new StopWatch();
+        watch.start();
         this.checkModelFiles(sender, ServerModelManager.BUILTIN);
         this.checkModelFiles(sender, ServerModelManager.CUSTOM);
         this.checkModelFiles(sender, ServerModelManager.AUTH);
         ServerModelManager.reloadPacks();
+        MinecraftServer server = MinecraftServer.getServer();
         if (FMLCommonHandler.instance().getSide().isClient()) {
             ServerModelManager.sendRequestSyncModelMessage();
         } else {
-            ServerModelManager.sendRequestSyncModelMessage(server.getPlayerList());
+            ServerModelManager.sendRequestSyncModelMessage(server.getConfigurationManager());
         }
-        server.getPlayerList().getPlayers().forEach(player -> CapabilityEvent.getAuthModelsCap(player).ifPresent(ownModelsCap -> {
+        server.getConfigurationManager().playerEntityList.forEach(player -> CapabilityEvent.getAuthModelsCap(player).ifPresent(ownModelsCap -> {
             CapabilityEvent.getModelInfoCap(player).ifPresent(modelIdCap -> {
-                if (ServerModelManager.AUTH_MODELS.contains(modelIdCap.getModelId().getPath()) && !ownModelsCap.containModel(modelIdCap.getModelId())) {
+                if (ServerModelManager.AUTH_MODELS.contains(modelIdCap.getModelId().getResourcePath()) && !ownModelsCap.containModel(modelIdCap.getModelId())) {
                     ResourceLocation defaultModelId = new ResourceLocation(YesSteveModel.MOD_ID, "default");
                     ResourceLocation defaultTextureId = new ResourceLocation(YesSteveModel.MOD_ID, "default/default.png");
                     modelIdCap.setModelAndTexture(defaultModelId, defaultTextureId);
@@ -150,7 +151,7 @@ public class ModelCommand extends CommandBase {
             });
         }));
         watch.stop();
-        notifyCommandListener(sender, this, "message.yes_steve_model.model.reload.info", watch.getTime(TimeUnit.MICROSECONDS) / 1000.0);
+        CommandUtils.notifyCommandListener(sender, this, "message.yes_steve_model.model.reload.info", TimeUnit.MICROSECONDS.convert(watch.getTime(), TimeUnit.NANOSECONDS) / 1000.0);
     }
 
     private void checkModelFiles(ICommandSender sender, Path rootPath) {
@@ -166,7 +167,7 @@ public class ModelCommand extends CommandBase {
         for (File dir : dirs) {
             String dirName = dir.getName();
             if (!ResourceUtil.isValidResourceLocation(dirName)) {
-                sender.sendMessage(new TextComponentTranslation("message.yes_steve_model.model.reload.error.dir_name", dirName));
+                sender.addChatMessage(new ChatComponentTranslation("message.yes_steve_model.model.reload.error.dir_name", dirName));
             }
             boolean noMainModelFile = true;
             boolean noArmModelFile = true;
@@ -186,16 +187,16 @@ public class ModelCommand extends CommandBase {
                     name = name.substring(0, name.length() - 4);
                     if (!ResourceUtil.isValidResourceLocation(name)) {
                         String showName = String.format("%s/%s.png", dirName, name);
-                        sender.sendMessage(new TextComponentTranslation("message.yes_steve_model.model.reload.error.texture_name", showName));
+                        sender.addChatMessage(new ChatComponentTranslation("message.yes_steve_model.model.reload.error.texture_name", showName));
                     }
                 }
             }
             if (noMainModelFile)
-                sender.sendMessage(new TextComponentTranslation("message.yes_steve_model.model.reload.error.no_main_file", dirName));
+                sender.addChatMessage(new ChatComponentTranslation("message.yes_steve_model.model.reload.error.no_main_file", dirName));
             if (noArmModelFile)
-                sender.sendMessage(new TextComponentTranslation("message.yes_steve_model.model.reload.error.no_arm_file", dirName));
+                sender.addChatMessage(new ChatComponentTranslation("message.yes_steve_model.model.reload.error.no_arm_file", dirName));
             if (noTextureFile)
-                sender.sendMessage(new TextComponentTranslation("message.yes_steve_model.model.reload.error.no_texture_file", dirName));
+                sender.addChatMessage(new ChatComponentTranslation("message.yes_steve_model.model.reload.error.no_texture_file", dirName));
         }
     }
 
@@ -211,11 +212,11 @@ public class ModelCommand extends CommandBase {
 
     @Nonnull
     @Override
-    public List<String> getTabCompletions(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args, @Nullable BlockPos targetPos) {
+    public List<String> addTabCompletionOptions(@Nonnull ICommandSender sender, @Nonnull String[] args) {
         return switch (args.length) {
             case 1 -> getListOfStringsMatchingLastWord(args, RELOAD_NAME, SET_NAME, EXPORT_NAME);
             case 2 -> SET_NAME.equalsIgnoreCase(args[0]) ?
-                    getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) :
+                    getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames()) :
                     Collections.emptyList();
             case 3 -> SET_NAME.equalsIgnoreCase(args[0]) ?
                     getListOfStringsMatchingLastWord(args, ModelsArgument.listSuggestions()) :

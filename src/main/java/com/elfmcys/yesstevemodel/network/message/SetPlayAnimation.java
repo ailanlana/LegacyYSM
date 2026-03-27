@@ -1,19 +1,19 @@
 package com.elfmcys.yesstevemodel.network.message;
 
 import com.elfmcys.yesstevemodel.event.CapabilityEvent;
+import com.elfmcys.yesstevemodel.network.message.util.ExtendedBuffer;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import javax.annotation.Nullable;
 
-public class SetPlayAnimation implements IPacketBufferMessage {
+public class SetPlayAnimation implements IExtendedBufferMessage {
     private static final int STOP = -1;
     private int extraAnimationId;
 
+    @SuppressWarnings("unused")
     public SetPlayAnimation() {
     }
 
@@ -26,12 +26,12 @@ public class SetPlayAnimation implements IPacketBufferMessage {
     }
 
     @Override
-    public void toBytes(PacketBuffer buf) {
+    public void toBytes(ExtendedBuffer buf) {
         buf.writeInt(this.extraAnimationId);
     }
 
     @Override
-    public void fromBytes(PacketBuffer buf) {
+    public void fromBytes(ExtendedBuffer buf) {
         this.extraAnimationId = buf.readInt();
     }
 
@@ -40,15 +40,10 @@ public class SetPlayAnimation implements IPacketBufferMessage {
         @Override
         public IMessage onMessage(SetPlayAnimation message, MessageContext ctx) {
             if (ctx.side.isServer()) {
-                FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> {
-                    EntityPlayerMP sender = ctx.getServerHandler().player;
-                    if (sender == null) {
-                        return;
-                    }
-                    if (STOP <= message.extraAnimationId && message.extraAnimationId < 8) {
-                        handleCapability(message, sender);
-                    }
-                });
+                EntityPlayerMP sender = ctx.getServerHandler().playerEntity;
+                if (sender != null && STOP <= message.extraAnimationId && message.extraAnimationId < 8) {
+                    handleCapability(message, sender);
+                }
             }
             return null;
         }

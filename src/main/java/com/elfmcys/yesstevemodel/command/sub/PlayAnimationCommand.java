@@ -1,5 +1,6 @@
 package com.elfmcys.yesstevemodel.command.sub;
 
+import com.elfmcys.yesstevemodel.command.CommandUtils;
 import com.elfmcys.yesstevemodel.command.argument.AnimationArgument;
 import com.elfmcys.yesstevemodel.event.CapabilityEvent;
 import net.minecraft.command.CommandBase;
@@ -8,10 +9,8 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,13 +20,13 @@ public class PlayAnimationCommand extends CommandBase {
 
     @Nonnull
     @Override
-    public String getName() {
+    public String getCommandName() {
         return PLAY_NAME;
     }
 
     @Nonnull
     @Override
-    public String getUsage(@Nonnull ICommandSender sender) {
+    public String getCommandUsage(@Nonnull ICommandSender sender) {
         return "commands.yes_steve_model.play.usage";
     }
 
@@ -37,9 +36,9 @@ public class PlayAnimationCommand extends CommandBase {
     }
 
     @Override
-    public void execute(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args) throws CommandException {
-        if (args.length != 2) throw new WrongUsageException(this.getUsage(sender));
-        List<EntityPlayerMP> targets = getPlayers(server, sender, args[0]);
+    public void processCommand(@Nonnull ICommandSender sender, @Nonnull String[] args) throws CommandException {
+        if (args.length != 2) throw new WrongUsageException(this.getCommandUsage(sender));
+        List<EntityPlayerMP> targets = CommandUtils.getPlayers(sender, args[0]);
         this.playAnimation(targets, args[1]);
     }
 
@@ -55,9 +54,9 @@ public class PlayAnimationCommand extends CommandBase {
 
     @Nonnull
     @Override
-    public List<String> getTabCompletions(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args, @Nullable BlockPos targetPos) {
+    public List<String> addTabCompletionOptions(@Nonnull ICommandSender sender, @Nonnull String[] args) {
         return switch (args.length) {
-            case 1 -> getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
+            case 1 -> getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
             case 2 -> getListOfStringsMatchingLastWord(args, AnimationArgument.listSuggestions());
             default -> Collections.emptyList();
         };

@@ -1,17 +1,15 @@
 package com.elfmcys.yesstevemodel.geckolib3.geo.raw.pojo;
 
 import com.google.gson.*;
-import com.google.gson.annotations.JsonAdapter;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
 
-@JsonAdapter(LocatorValue.Serializer.class)
 public class LocatorValue implements Serializable {
     public LocatorClass locatorClassValue;
     public double[] doubleArrayValue;
 
-    protected static class Serializer implements JsonSerializer<LocatorValue>, JsonDeserializer<LocatorValue> {
+    public static class Serializer implements JsonSerializer<LocatorValue>, JsonDeserializer<LocatorValue> {
         @Override
         public LocatorValue deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             LocatorValue result = new LocatorValue();

@@ -1,6 +1,5 @@
 package com.elfmcys.yesstevemodel.config.util;
 
-import mcp.MethodsReturnNonnullByDefault;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -14,7 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 
 // TODO: 更好的数值校验，Forge 自带的不能处理好很多东西
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public class ConfigBuilder {
@@ -37,7 +35,7 @@ public class ConfigBuilder {
 
     /**
      * 从 Property 读取值，并写入 currentValue。
-     * 这个方法可在 {@link net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent} 调用，
+     * 这个方法可在 {@link cpw.mods.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent} 调用，
      * 此时 Property 已经写入了新值，currentValue 和配置文件还没有更新。
      */
     public static ConfigBuilder startReadingFromProp(Configuration config) {

@@ -1,18 +1,21 @@
 package com.elfmcys.yesstevemodel.util;
 
 import com.elfmcys.yesstevemodel.client.ClientProxy;
+import com.elfmcys.yesstevemodel.client.compat.EntityEquipmentSlot;
+import com.elfmcys.yesstevemodel.client.compat.Hand;
 import com.elfmcys.yesstevemodel.client.entity.CustomPlayerEntity;
+import com.elfmcys.yesstevemodel.client.gui.button.Button;
 import com.elfmcys.yesstevemodel.client.renderer.CustomPlayerRenderer;
 import com.elfmcys.yesstevemodel.geckolib3.core.IAnimatable;
 import com.elfmcys.yesstevemodel.geckolib3.geo.GeoReplacedEntityRenderer;
-import net.minecraft.block.BlockFlower;
-import net.minecraft.block.BlockTallGrass;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.Entity;
@@ -22,13 +25,11 @@ import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntityPig;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
@@ -55,21 +56,21 @@ public final class RenderUtil {
                 entity.setMainModel(ModelIdUtil.getMainId(modelId));
                 entity.setTexture(textureId);
 
-                GlStateManager.pushMatrix();
-                GlStateManager.translate(pPosX, pPosY, 1050.0F);
-                GlStateManager.scale(1.0F, 1.0F, -1.0F);
+                GL11.glPushMatrix();
+                GL11.glTranslatef(pPosX, pPosY, 1050.0F);
+                GL11.glScalef(1.0F, 1.0F, -1.0F);
 
                 /*
                 动画位移矩阵开始
                  */
-                GlStateManager.pushMatrix();
-                GlStateManager.translate(0.0D, 0.0D, 1000.0D);
-                GlStateManager.scale(pScale, pScale, pScale);
-                GlStateManager.translate(0, 0.8, 0);
-                GlStateManager.rotate(180.0F, 0, 0, 1);
+                GL11.glPushMatrix();
+                GL11.glTranslated(0.0D, 0.0D, 1000.0D);
+                GL11.glScalef(pScale, pScale, pScale);
+                GL11.glTranslated(0, 0.8, 0);
+                GL11.glRotatef(180.0F, 0, 0, 1);
                 rotateAndEnableLighting();
                 float xp = -10 + pitch;
-                GlStateManager.rotate(xp, 1, 0, 0);
+                GL11.glRotatef(xp, 1, 0, 0);
 
                 float yBodyRot = player.renderYawOffset;
                 float yBodyRotO = player.prevRenderYawOffset;
@@ -82,10 +83,10 @@ public final class RenderUtil {
                 Entity vehicle = player.ridingEntity;
 
                 boolean sleeping = player.sleeping;
-                BlockPos bedLocation = player.bedLocation;
-                float renderOffsetX = player.renderOffsetX;
-                float renderOffsetY = player.renderOffsetY;
-                float renderOffsetZ = player.renderOffsetZ;
+                ChunkCoordinates bedLocation = player.playerLocation; // bedLocation，MCP 标错了
+                float renderOffsetX = player.field_71079_bU; // renderOffsetX
+                float renderOffsetY = player.field_71082_cx; // renderOffsetY
+                float renderOffsetZ = player.field_71089_bV; // renderOffsetZ
 
                 player.renderYawOffset = -yaw;
                 player.prevRenderYawOffset = player.renderYawOffset;
@@ -97,19 +98,19 @@ public final class RenderUtil {
                 player.prevRotationYawHead = player.rotationYawHead;
                 player.ridingEntity = null;
 
-                RenderManager dispatcher = Minecraft.getMinecraft().getRenderManager();
+                RenderManager dispatcher = RenderManager.instance;
                 xp = 180.0F - xp;
-                dispatcher.setPlayerViewY(xp);
-                dispatcher.setRenderShadow(false);
+                dispatcher.playerViewY = xp;
+                //dispatcher.setRenderShadow(false);
                 if (entity.hasPreviewAnimation("sleep")) {
-                    GlStateManager.rotate(yaw - 90, 0, 1, 0);
-                    GlStateManager.translate(0.5, 0.5625, 0);
+                    GL11.glRotatef(yaw - 90, 0, 1, 0);
+                    GL11.glTranslated(0.5, 0.5625, 0);
                     player.sleeping = true;
                     // 原版的床睡完后不会重置这几个状态
-                    player.bedLocation = null;
-                    player.renderOffsetX = 0;
-                    player.renderOffsetY = 0;
-                    player.renderOffsetZ = 0;
+                    player.playerLocation = null;
+                    player.field_71079_bU = 0;
+                    player.field_71082_cx = 0;
+                    player.field_71089_bV = 0;
                 }
                 if (entity.hasPreviewAnimation("swim") || entity.hasPreviewAnimation("swim_stand")) {
                     //player.setPose(Pose.SWIMMING);
@@ -118,31 +119,31 @@ public final class RenderUtil {
                     //player.setPose(Pose.CROUCHING);
                 }
                 if (entity.hasPreviewAnimation("sit")) {
-                    GlStateManager.translate(0, -0.5, 0);
+                    GL11.glTranslated(0, -0.5, 0);
                 }
                 if (entity.hasPreviewAnimation("ride")) {
-                    GlStateManager.translate(0, 0.85, 0);
+                    GL11.glTranslated(0, 0.85, 0);
                 }
                 if (entity.hasPreviewAnimation("ride_pig")) {
-                    GlStateManager.translate(0, 0.3125, 0);
+                    GL11.glTranslated(0, 0.3125, 0);
                 }
                 if (entity.hasPreviewAnimation("boat")) {
-                    GlStateManager.translate(0, -0.45, 0);
+                    GL11.glTranslated(0, -0.45, 0);
                 }
-                GlStateManager.pushMatrix();
+                GL11.glPushMatrix();
                 renderer.render(player, entity, 0, 0, 0, 0.0F, 1.0F);
-                GlStateManager.popMatrix();
+                GL11.glPopMatrix();
                 // 清理实体渲染
-                GlStateManager.enableRescaleNormal();
-                GlStateManager.enableColorMaterial();
-                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+                GL11.glEnable(GL11.GL_COLOR_MATERIAL);
+                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
                 OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
                 try {
                     renderExtraEntity(yaw, player, entity, dispatcher);
                 } catch (ExecutionException e) {
                     throw new RuntimeException(e);
                 }
-                GlStateManager.popMatrix();
+                GL11.glPopMatrix();
                 /*
                 动画位移矩阵结束
                  */
@@ -152,7 +153,7 @@ public final class RenderUtil {
                     }
                     renderGround(pScale, pitch, yaw);
                 }
-                dispatcher.setRenderShadow(true);
+                //dispatcher.setRenderShadow(true);
 
                 player.renderYawOffset = yBodyRot;
                 player.prevRenderYawOffset = yBodyRotO;
@@ -165,18 +166,18 @@ public final class RenderUtil {
                 player.ridingEntity = vehicle;
 
                 player.sleeping = sleeping;
-                player.bedLocation = bedLocation;
-                player.renderOffsetX = renderOffsetX;
-                player.renderOffsetY = renderOffsetY;
-                player.renderOffsetZ = renderOffsetZ;
+                player.playerLocation = bedLocation;
+                player.field_71079_bU = renderOffsetX;
+                player.field_71082_cx = renderOffsetY;
+                player.field_71089_bV = renderOffsetZ;
 
-                GlStateManager.popMatrix();
+                GL11.glPopMatrix();
 
                 RenderHelper.disableStandardItemLighting();
-                GlStateManager.disableRescaleNormal();
-                GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-                GlStateManager.disableTexture2D();
-                GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
+                GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+                OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
+                GL11.glDisable(GL11.GL_TEXTURE_2D);
+                OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
             }
         } catch (ExecutionException e) {
             e.printStackTrace();
@@ -184,79 +185,123 @@ public final class RenderUtil {
     }
 
     private static void renderBed(float scale, float pitch, float yaw) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(0.0D, 0.0D, 1000.0D);
-        GlStateManager.scale(scale, scale, scale);
-        GlStateManager.translate(0, 0.8, 0);
-        GlStateManager.rotate(180.0F, 0, 0, 1);
-        GlStateManager.rotate(-10 + pitch, 1, 0, 0);
+        GL11.glPushMatrix();
+        GL11.glTranslated(0.0D, 0.0D, 1000.0D);
+        GL11.glScalef(scale, scale, scale);
+        GL11.glTranslated(0, 0.8, 0);
+        GL11.glRotatef(180.0F, 0, 0, 1);
+        GL11.glRotatef(-10 + pitch, 1, 0, 0);
 
-        GlStateManager.rotate(yaw + 180, 0, 1, 0);
-        GlStateManager.translate(-0.5, 0, 0.5);
-        ItemStack stack = new ItemStack(Items.BED, 1, EnumDyeColor.RED.getMetadata());
-        stack.getItem().getTileEntityItemStackRenderer().renderByItem(stack);
-        GlStateManager.popMatrix();
+        GL11.glRotatef(yaw + 180, 0, 1, 0);
+        GL11.glTranslated(-0.5, 0, 0.5);
+        // TODO：以下是 AI 写的，可用性未知
+        Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
+
+        Tessellator tessellator = Tessellator.instance;
+        RenderBlocks renderBlocks = RenderBlocks.getInstance();
+
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+
+        GL11.glPushMatrix();
+        GL11.glTranslatef(0, 0, 1);
+        renderBlocks.setRenderBounds(0.0D, 0.0D, 0.0D, 1.0D, 0.5625D, 1.0D);
+        tessellator.startDrawingQuads();
+        tessellator.setNormal(0.0F, -1.0F, 0.0F);
+        renderBlocks.renderFaceYNeg(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(0, 8));
+        tessellator.setNormal(0.0F, 1.0F, 0.0F);
+        renderBlocks.renderFaceYPos(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(1, 8));
+        tessellator.setNormal(0.0F, 0.0F, -1.0F);
+        renderBlocks.renderFaceZNeg(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(2, 8));
+        tessellator.setNormal(0.0F, 0.0F, 1.0F);
+        renderBlocks.renderFaceZPos(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(3, 8));
+        tessellator.setNormal(-1.0F, 0.0F, 0.0F);
+        renderBlocks.renderFaceXNeg(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(4, 8));
+        tessellator.setNormal(1.0F, 0.0F, 0.0F);
+        renderBlocks.renderFaceXPos(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(5, 8));
+        tessellator.draw();
+        GL11.glPopMatrix();
+
+        GL11.glPushMatrix();
+        renderBlocks.setRenderBounds(0.0D, 0.0D, 0.0D, 1.0D, 0.5625D, 1.0D);
+        tessellator.startDrawingQuads();
+        tessellator.setNormal(0.0F, -1.0F, 0.0F);
+        renderBlocks.renderFaceYNeg(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(0, 0));
+        tessellator.setNormal(0.0F, 1.0F, 0.0F);
+        renderBlocks.renderFaceYPos(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(1, 0));
+        tessellator.setNormal(0.0F, 0.0F, -1.0F);
+        renderBlocks.renderFaceZNeg(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(2, 0));
+        tessellator.setNormal(0.0F, 0.0F, 1.0F);
+        renderBlocks.renderFaceZPos(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(3, 0));
+        tessellator.setNormal(-1.0F, 0.0F, 0.0F);
+        renderBlocks.renderFaceXNeg(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(4, 0));
+        tessellator.setNormal(1.0F, 0.0F, 0.0F);
+        renderBlocks.renderFaceXPos(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(5, 0));
+        tessellator.draw();
+        GL11.glPopMatrix();
+
+        GL11.glPopMatrix();
     }
 
     private static void renderGround(float scale, float pitch, float yaw) {
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(0.0D, 0.0D, 1000.0D);
-        GlStateManager.scale(scale, scale, scale);
-        GlStateManager.translate(0, 0.8, 0);
-        GlStateManager.rotate(180.0F, 0, 0, 1);
-        GlStateManager.rotate(-10 + pitch, 1, 0, 0);
+        GL11.glPushMatrix();
+        GL11.glTranslated(0.0D, 0.0D, 1000.0D);
+        GL11.glScalef(scale, scale, scale);
+        GL11.glTranslated(0, 0.8, 0);
+        GL11.glRotatef(180.0F, 0, 0, 1);
+        GL11.glRotatef(-10 + pitch, 1, 0, 0);
 
-        GlStateManager.rotate(yaw, 0, 1, 0);
-        GlStateManager.translate(-1.5, -1, -1.5);
+        GL11.glRotatef(yaw, 0, 1, 0);
+        GL11.glTranslated(-1.5, -1, -1.5);
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                GlStateManager.translate(0, 0, 1);
-                renderSingleBlock(Blocks.GRASS.getDefaultState());
+                GL11.glTranslatef(0, 0, 1);
+                renderSingleBlock(Blocks.grass, 0);
             }
-            GlStateManager.translate(1, 0, -3);
+            GL11.glTranslatef(1, 0, -3);
         }
-        GlStateManager.translate(-1, 1, 1);
-        renderSingleBlock(Blocks.TALLGRASS.getDefaultState().withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS));
-        GlStateManager.translate(0, 0, 1);
-        renderSingleBlock(Blocks.RED_FLOWER.getDefaultState().withProperty(Blocks.RED_FLOWER.getTypeProperty(), BlockFlower.EnumFlowerType.RED_TULIP));
-        GlStateManager.popMatrix();
+        GL11.glTranslatef(-1, 1, 1);
+        renderSingleBlock(Blocks.tallgrass, 1);
+        GL11.glTranslatef(0, 0, 1);
+        renderSingleBlock(Blocks.red_flower, 4);
+        GL11.glPopMatrix();
     }
 
-    private static void renderSingleBlock(IBlockState state) {
-        GlStateManager.pushMatrix(); // 一定要 push，原版方块渲染不干净
+    private static void renderSingleBlock(Block block, int meta) {
+        GL11.glPushMatrix(); // 一定要 push，原版方块渲染不干净
         final Minecraft mc = Minecraft.getMinecraft();
-        mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-        mc.getBlockRendererDispatcher().renderBlockBrightness(state, 1.0F);
-        GlStateManager.popMatrix();
+        mc.getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
+        RenderBlocks.getInstance().renderBlockAsItem(block, meta, 1.0F);
+        GL11.glPopMatrix();
     }
 
-    @SuppressWarnings({"DataFlowIssue", "UnnecessaryReturnStatement"})
+    @SuppressWarnings("UnnecessaryReturnStatement")
     private static void renderExtraEntity(float yaw, EntityPlayer player, CustomPlayerEntity playerEntity, RenderManager dispatcher) throws ExecutionException {
         if (playerEntity.hasPreviewAnimation("ride")) {
-            Entity entity = AnimatableCacheUtil.ENTITIES_CACHE.get(EntityList.getKey(EntityHorse.class), () -> new EntityHorse(player.world));
+            Entity entity = AnimatableCacheUtil.ENTITIES_CACHE.get(EntityList.classToStringMapping.get(EntityHorse.class), () -> new EntityHorse(player.worldObj));
             renderExtraEntity(yaw, player, dispatcher, entity);
             return;
         }
         if (playerEntity.hasPreviewAnimation("ride_pig")) {
-            Entity entity = AnimatableCacheUtil.ENTITIES_CACHE.get(EntityList.getKey(EntityPig.class), () -> new EntityPig(player.world));
+            Entity entity = AnimatableCacheUtil.ENTITIES_CACHE.get(EntityList.classToStringMapping.get(EntityPig.class), () -> new EntityPig(player.worldObj));
             renderExtraEntity(yaw, player, dispatcher, entity);
             return;
         }
         if (playerEntity.hasPreviewAnimation("boat")) {
-            Entity entity = AnimatableCacheUtil.ENTITIES_CACHE.get(EntityList.getKey(EntityBoat.class), () -> new EntityBoat(player.world));
+            Entity entity = AnimatableCacheUtil.ENTITIES_CACHE.get(EntityList.classToStringMapping.get(EntityBoat.class), () -> new EntityBoat(player.worldObj));
             renderExtraEntity(yaw, player, dispatcher, entity);
             return;
         }
     }
 
     private static void renderExtraEntity(float yaw, EntityPlayer player, RenderManager dispatcher, Entity entity) {
-        GlStateManager.rotate(yaw, 0, 1, 0);
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        dispatcher.renderEntity(entity, 0, -entity.getMountedYOffset() - player.getYOffset(), 0, 0.0F, 1.0F, false);
+        GL11.glRotatef(yaw, 0, 1, 0);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        // renderEntity Args: entityIn, x, y, z, yaw, partialTicks, hideBox
+        dispatcher.func_147939_a(entity, 0, -entity.getMountedYOffset() - player.getYOffset(), 0, 0.0F, 1.0F, false);
         // 清理实体渲染
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.enableColorMaterial();
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+        GL11.glEnable(GL11.GL_COLOR_MATERIAL);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
     }
 
@@ -277,7 +322,7 @@ public final class RenderUtil {
     }
 
     /**
-     * {@link com.elfmcys.yesstevemodel.client.gui.button.TextureButton#renderWidget(Minecraft, int, int, float)}
+     * {@link Button#renderWidget(Minecraft, int, int)}
      */
     @SuppressWarnings("JavadocReference")
     public static void renderTextureButtonEntity(int pPosX, int pPosY, int pScale, EntityPlayer player, ResourceLocation modelId, ResourceLocation textureId) {
@@ -297,16 +342,16 @@ public final class RenderUtil {
         entity.setMainModel(ModelIdUtil.getMainId(modelId));
         entity.setTexture(textureId);
 
-        GlStateManager.pushMatrix();
-        GlStateManager.translate((float) pPosX, (float) pPosY, 1050.0F);
-        GlStateManager.scale(1.0F, 1.0F, -1.0F);
+        GL11.glPushMatrix();
+        GL11.glTranslatef((float) pPosX, (float) pPosY, 1050.0F);
+        GL11.glScalef(1.0F, 1.0F, -1.0F);
 
-        GlStateManager.translate(0.0D, disableRot ? 5.5D : 0.0D, 1000.0D);
-        GlStateManager.scale(pScale, pScale, pScale);
-        GlStateManager.rotate(180.0F, 0, 0, 1);
+        GL11.glTranslated(0.0D, disableRot ? 5.5D : 0.0D, 1000.0D);
+        GL11.glScalef(pScale, pScale, pScale);
+        GL11.glRotatef(180.0F, 0, 0, 1);
         rotateAndEnableLighting();
         float xp = disableRot ? 0.0F : -10.0F;
-        GlStateManager.rotate(xp, 1, 0, 0);
+        GL11.glRotatef(xp, 1, 0, 0);
 
         float yBodyRot = player.renderYawOffset;
         float yBodyRotO = player.prevRenderYawOffset;
@@ -321,13 +366,13 @@ public final class RenderUtil {
         ItemStack[] itemStacks = new ItemStack[EntityEquipmentSlot.values().length];
         int i = 0;
         for (EntityEquipmentSlot slot : EntityEquipmentSlot.values()) {
-            itemStacks[i] = player.getItemStackFromSlot(slot);
+            itemStacks[i] = slot.getItemStackFromSlot(player);
             if (slot == EntityEquipmentSlot.MAINHAND) {
-                player.inventory.mainInventory.set(player.inventory.currentItem, ItemStack.EMPTY);
+                Hand.MAIN_HAND.setHeldItem(player, null);
             } else if (slot == EntityEquipmentSlot.OFFHAND) {
-                player.inventory.offHandInventory.set(0, ItemStack.EMPTY);
+                Hand.OFF_HAND.setHeldItem(player, null);
             } else {
-                player.inventory.armorInventory.set(slot.getIndex(), ItemStack.EMPTY);
+                player.inventory.armorInventory[slot.getIndex()] = null;
             }
             i++;
         }
@@ -343,14 +388,14 @@ public final class RenderUtil {
         player.prevRotationYawHead = player.rotationYawHead;
         player.ridingEntity = null;
 
-        RenderManager dispatcher = Minecraft.getMinecraft().getRenderManager();
+        RenderManager dispatcher = RenderManager.instance;
         xp = 180.0F - xp;
-        dispatcher.setPlayerViewY(xp);
-        dispatcher.setRenderShadow(false);
-        GlStateManager.pushMatrix();
+        dispatcher.playerViewY = xp;
+        //dispatcher.setRenderShadow(false);
+        GL11.glPushMatrix();
         renderer.render(player, entity, 0, 0, 0, 0.0F, 1.0F);
-        GlStateManager.popMatrix();
-        dispatcher.setRenderShadow(true);
+        GL11.glPopMatrix();
+        //dispatcher.setRenderShadow(true);
 
         player.renderYawOffset = yBodyRot;
         player.prevRenderYawOffset = yBodyRotO;
@@ -366,60 +411,61 @@ public final class RenderUtil {
         for (EntityEquipmentSlot slot : EntityEquipmentSlot.values()) {
             ItemStack itemStack = itemStacks[i];
             if (slot == EntityEquipmentSlot.MAINHAND) {
-                player.inventory.mainInventory.set(player.inventory.currentItem, itemStack);
+                Hand.MAIN_HAND.setHeldItem(player, itemStack);
             } else if (slot == EntityEquipmentSlot.OFFHAND) {
-                player.inventory.offHandInventory.set(0, itemStack);
+                Hand.OFF_HAND.setHeldItem(player, itemStack);
             } else {
-                player.inventory.armorInventory.set(slot.getIndex(), itemStack);
+                player.inventory.armorInventory[slot.getIndex()] = itemStack;
             }
             i++;
         }
 
-        GlStateManager.popMatrix();
+        GL11.glPopMatrix();
 
         RenderHelper.disableStandardItemLighting();
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-        GlStateManager.disableTexture2D();
-        GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
+        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+        OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
     }
 
     public static void renderPlayerEntity(EntityPlayer player, double posX, double posY, float scale, float yawOffset, int z) {
-        GlStateManager.enableColorMaterial();
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        GlStateManager.pushMatrix();
-        GlStateManager.translate((float) posX + scale * 0.5f, (float) posY + scale * 2, z);
-        GlStateManager.scale(1, 1, -1);
-        GlStateManager.scale(scale, scale, scale);
-        GlStateManager.rotate(180.0F, 0, 0, 1);
+        GL11.glEnable(GL11.GL_COLOR_MATERIAL);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GL11.glPushMatrix();
+        GL11.glTranslatef((float) posX + scale * 0.5f, (float) posY + scale * 2, z);
+        GL11.glScalef(1, 1, -1);
+        GL11.glScalef(scale, scale, scale);
+        GL11.glRotatef(180.0F, 0, 0, 1);
         rotateAndEnableLighting();
         float yRot = player.renderYawOffset + yawOffset - 180;
-        GlStateManager.rotate(yRot, 0, 1, 0);
-        RenderManager renderDispatcher = Minecraft.getMinecraft().getRenderManager();
+        GL11.glRotatef(yRot, 0, 1, 0);
+        RenderManager renderDispatcher = RenderManager.instance;
         yRot = 180.0F - yRot;
-        renderDispatcher.setPlayerViewY(yRot);
-        renderDispatcher.setRenderShadow(false);
-        renderDispatcher.renderEntity(player, 0, 0, 0, 0.0F, 1.0F, false); // 最后这个参数是隐藏碰撞箱
-        renderDispatcher.setRenderShadow(true);
-        GlStateManager.popMatrix();
+        renderDispatcher.playerViewY = yRot;
+        //renderDispatcher.setRenderShadow(false);
+        // renderEntity Args: entityIn, x, y, z, yaw, partialTicks, hideBox
+        renderDispatcher.func_147939_a(player, 0, 0, 0, 0.0F, 1.0F, false);
+        //renderDispatcher.setRenderShadow(true);
+        GL11.glPopMatrix();
 
         RenderHelper.disableStandardItemLighting();
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-        GlStateManager.disableTexture2D();
-        GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+        OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     private static void rotateAndEnableLighting() {
-        GlStateManager.rotate(135.0F, 0, 1, 0);
+        GL11.glRotatef(135.0F, 0, 1, 0);
         RenderHelper.enableStandardItemLighting();
-        GlStateManager.rotate(-135.0F, 0, 1, 0);
+        GL11.glRotatef(-135.0F, 0, 1, 0);
     }
 
     public static void scissor(int screenX, int screenY, int boxWidth, int boxHeight) {
         final Minecraft mc = Minecraft.getMinecraft();
-        int scale = new ScaledResolution(mc).getScaleFactor();
+        int scale = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight).getScaleFactor();
 
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         GL11.glScissor(
@@ -428,5 +474,28 @@ public final class RenderUtil {
                 Math.max(0, boxWidth * scale),
                 Math.max(0, boxHeight * scale)
         );
+    }
+
+    /**
+     * Draws a textured rectangle at z = 0.
+     */
+    public static void drawModalRectWithCustomSizedTexture(int x, int y, float u, float v, int width, int height, float textureWidth, float textureHeight) {
+        Gui.func_146110_a(x, y, u, v, width, height, textureWidth, textureHeight);
+    }
+
+    /**
+     * Draws a scaled, textured, tiled modal rect at z = 0.
+     *
+     * @param u          Texture U (or x) coordinate, in pixels
+     * @param v          Texture V (or y) coordinate, in pixels
+     * @param uWidth     Width of the rendered part of the texture, in pixels.
+     *                   Parts of the texture outside of it will wrap around
+     * @param vHeight    Height of the rendered part of the texture, in pixels.
+     *                   Parts of the texture outside of it will wrap around
+     * @param tileWidth  total width of the texture
+     * @param tileHeight total height of the texture
+     */
+    public static void drawScaledCustomSizeModalRect(int x, int y, float u, float v, int uWidth, int vHeight, int width, int height, float tileWidth, float tileHeight) {
+        Gui.func_152125_a(x, y, u, v, uWidth, vHeight, width, height, tileWidth, tileHeight);
     }
 }

@@ -1,20 +1,18 @@
 package com.elfmcys.yesstevemodel.mixin;
 
-import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
-import zone.rong.mixinbooter.IEarlyMixinLoader;
+import com.gtnewhorizon.gtnhmixins.IEarlyMixinLoader;
+import cpw.mods.fml.relauncher.FMLLaunchHandler;
+import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-@IFMLLoadingPlugin.MCVersion("1.12.2")
+@SuppressWarnings("unused")
+@IFMLLoadingPlugin.MCVersion("1.7.10")
 public class EarlyMixin implements IFMLLoadingPlugin, IEarlyMixinLoader {
-    @Override
-    public List<String> getMixinConfigs() {
-        return Collections.singletonList("mixins.yes_steve_model.early.json");
-    }
-
     @Nullable
     @Override
     public String[] getASMTransformerClass() {
@@ -41,5 +39,25 @@ public class EarlyMixin implements IFMLLoadingPlugin, IEarlyMixinLoader {
     @Override
     public String getAccessTransformerClass() {
         return null;
+    }
+
+    @Override
+    public String getMixinConfig() {
+        return "mixins.yes_steve_model.early.json";
+    }
+
+    @Override
+    public List<String> getMixins(Set<String> loadedCoreMods) {
+        List<String> mixins = new ArrayList<>();
+        if (FMLLaunchHandler.side().isClient()) {
+            mixins.add("client.ItemRendererMixin");
+            mixins.add("client.MinecraftAccessor");
+            mixins.add("client.MinecraftMixin");
+            mixins.add("client.RenderArrowMixin");
+            mixins.add("client.RenderPlayerEventPreMixin");
+            mixins.add("client.RenderPlayerMixin");
+        }
+        mixins.add("EntityArrowMixin");
+        return mixins;
     }
 }

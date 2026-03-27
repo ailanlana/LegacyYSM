@@ -1,9 +1,9 @@
 package com.elfmcys.yesstevemodel.client.animation.condition;
 
-import net.minecraft.util.EnumHand;
+import com.elfmcys.yesstevemodel.client.compat.Hand;
 
 public class ConditionalUse extends AbstractConditionItem {
-    public ConditionalUse(EnumHand hand) {
-        super("use_" + (hand == EnumHand.MAIN_HAND ? "mainhand" : "offhand"));
+    public ConditionalUse(Hand hand) {
+        super("use_" + (hand == Hand.MAIN_HAND ? "mainhand" : "offhand"));
     }
 }

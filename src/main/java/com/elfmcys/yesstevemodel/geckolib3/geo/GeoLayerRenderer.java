@@ -3,10 +3,10 @@ package com.elfmcys.yesstevemodel.geckolib3.geo;
 import com.elfmcys.yesstevemodel.geckolib3.core.util.Color;
 import com.elfmcys.yesstevemodel.geckolib3.model.provider.GeoModelProvider;
 import net.minecraft.client.model.ModelBase;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
 
@@ -25,7 +25,9 @@ public abstract class GeoLayerRenderer<T extends Entity, R extends IGeoRenderer<
             float red, float green, float blue
     ) {
         if (!entityIn.isInvisible()) {
-            modelParentIn.setModelAttributes(modelIn);
+            modelParentIn.onGround = modelIn.onGround; // 应为 swingProgress，MCP 标错了
+            modelParentIn.isRiding = modelIn.isRiding;
+            modelParentIn.isChild = modelIn.isChild;
             modelIn.setLivingAnimations(entityIn, limbSwing, limbSwingAmount, partialTicks);
             modelIn.setRotationAngles(
                     limbSwing, limbSwingAmount, ageInTicks,
@@ -45,7 +47,7 @@ public abstract class GeoLayerRenderer<T extends Entity, R extends IGeoRenderer<
             float netHeadYaw, float headPitch, float scale,
             float red, float green, float blue
     ) {
-        GlStateManager.color(red, green, blue, 1f);
+        GL11.glColor4f(red, green, blue, 1f);
         modelIn.render(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
     }
 
@@ -59,12 +61,11 @@ public abstract class GeoLayerRenderer<T extends Entity, R extends IGeoRenderer<
     }
 
     protected ResourceLocation getEntityTexture(T entityIn) {
-        return this.entityRenderer.getEntityTexture(entityIn);
+        return this.entityRenderer.getTextureLocation(entityIn);
     }
 
     /**
-     * 核心渲染方法，会在主模型渲染后调用。<br>
-     * {@link net.minecraft.client.renderer.entity.layers.LayerRenderer#doRenderLayer(EntityLivingBase, float, float, float, float, float, float, float)}
+     * 核心渲染方法，会在主模型渲染后调用。
      */
     public abstract void render(
             @Nonnull T entityLivingBaseIn, float limbSwing, float limbSwingAmount,
@@ -73,8 +74,7 @@ public abstract class GeoLayerRenderer<T extends Entity, R extends IGeoRenderer<
     );
 
     /**
-     * 由外部调用，可影响是否要加上额外效果，如受击红光。<br>
-     * {@link net.minecraft.client.renderer.entity.layers.LayerRenderer#shouldCombineTextures()}
+     * 由外部调用，可影响是否要加上额外效果，如受击红光。
      */
     public boolean shouldCombineTextures() {
         return false;

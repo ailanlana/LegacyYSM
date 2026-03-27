@@ -5,7 +5,7 @@ import com.elfmcys.yesstevemodel.geckolib3.core.builder.ILoopType;
 import com.elfmcys.yesstevemodel.geckolib3.core.event.predicate.AnimationEvent;
 import com.github.bsideup.jabel.Desugar;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.MathHelper;
 
 import java.util.function.BiPredicate;
 
@@ -19,7 +19,7 @@ public record AnimationState(
     public AnimationState(String animationName, ILoopType loopType, int priority, BiPredicate<EntityPlayer, AnimationEvent<CustomPlayerEntity>> predicate) {
         this.animationName = animationName;
         this.loopType = loopType;
-        this.priority = MathHelper.clamp(priority, Priority.HIGHEST, Priority.LOWEST);
+        this.priority = MathHelper.clamp_int(priority, Priority.HIGHEST, Priority.LOWEST);
         this.predicate = predicate;
     }
 }

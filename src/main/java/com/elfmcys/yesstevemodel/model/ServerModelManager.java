@@ -20,7 +20,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.management.PlayerList;
+import net.minecraft.server.management.ServerConfigurationManager;
 import org.apache.commons.io.FileUtils;
 
 import javax.annotation.Nonnull;
@@ -77,8 +77,8 @@ public final class ServerModelManager {
      */
     public static final Set<String> AUTH_MODELS = Sets.newHashSet();
 
-    public static void sendRequestSyncModelMessage(PlayerList playerList) {
-        for (EntityPlayerMP player : playerList.getPlayers()) {
+    public static void sendRequestSyncModelMessage(ServerConfigurationManager playerList) {
+        for (EntityPlayerMP player : playerList.playerEntityList) {
             NetworkHandler.sendToClientPlayer(new RequestSyncModel(), player);
         }
     }

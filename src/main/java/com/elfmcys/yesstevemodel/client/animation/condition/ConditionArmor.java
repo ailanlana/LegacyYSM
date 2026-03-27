@@ -1,15 +1,14 @@
 package com.elfmcys.yesstevemodel.client.animation.condition;
 
-import com.elfmcys.yesstevemodel.util.ResourceUtil;
+import com.elfmcys.yesstevemodel.client.compat.EntityEquipmentSlot;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import cpw.mods.fml.common.registry.GameData;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.oredict.OreDictionary;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -28,14 +27,11 @@ public class ConditionArmor {
     public void addTest(String name) {
         Matcher matcherId = ID_PRE_REG.matcher(name);
         if (matcherId.find()) {
-            EntityEquipmentSlot type = getType(matcherId.group(1));
+            EntityEquipmentSlot type = EntityEquipmentSlot.getType(matcherId.group(1));
             if (type == null) {
                 return;
             }
             String id = matcherId.group(2);
-            if (!ResourceUtil.isValidResourceLocation(id)) {
-                return;
-            }
             ResourceLocation res = new ResourceLocation(id);
             if (this.idTest.containsKey(type)) {
                 this.idTest.get(type).add(res);
@@ -47,7 +43,7 @@ public class ConditionArmor {
 
         Matcher matcherOre = ORE_PRE_REG.matcher(name);
         if (matcherOre.find()) {
-            EntityEquipmentSlot type = getType(matcherOre.group(1));
+            EntityEquipmentSlot type = EntityEquipmentSlot.getType(matcherOre.group(1));
             if (type == null) {
                 return;
             }
@@ -88,8 +84,8 @@ public class ConditionArmor {
     }
 
     public String doTest(EntityPlayer player, EntityEquipmentSlot slot) {
-        ItemStack item = player.getItemStackFromSlot(slot);
-        if (item.isEmpty()) {
+        ItemStack item = slot.getItemStackFromSlot(player);
+        if (item == null) {
             return EMPTY;
         }
         String result;
@@ -110,11 +106,12 @@ public class ConditionArmor {
             return EMPTY;
         }
         List<ResourceLocation> idListTest = this.idTest.get(slot);
-        ItemStack item = player.getItemStackFromSlot(slot);
-        ResourceLocation registryName = item.getItem().getRegistryName();
-        if (registryName == null) {
+        ItemStack item = slot.getItemStackFromSlot(player);
+        String tempRegistryName = GameData.getItemRegistry().getNameForObject(item.getItem());
+        if (tempRegistryName == null) {
             return EMPTY;
         }
+        ResourceLocation registryName = new ResourceLocation(tempRegistryName);
         if (idListTest.contains(registryName)) {
             return slot.getName() + "$" + registryName;
         }
@@ -129,7 +126,7 @@ public class ConditionArmor {
             return EMPTY;
         }
         List<String> tagListTest = this.oreTest.get(slot);
-        ItemStack item = player.getItemStackFromSlot(slot);
+        ItemStack item = slot.getItemStackFromSlot(player);
         for (int id : OreDictionary.getOreIDs(item)) {
             String name = OreDictionary.getOreName(id);
             if ("Unknown".equals(name)) continue;
@@ -157,13 +154,4 @@ public class ConditionArmor {
 //            return false;
 //        }).findFirst().map(itemTagKey -> slot.getName() + "#" + itemTagKey).orElse(EMPTY);
 //    }
-
-    @Nullable
-    public static EntityEquipmentSlot getType(String type) {
-        try {
-            return EntityEquipmentSlot.fromString(type);
-        } catch (IllegalArgumentException ignored) {
-            return null;
-        }
-    }
 }

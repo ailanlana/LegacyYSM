@@ -1,9 +1,9 @@
 package com.elfmcys.yesstevemodel.client.animation.condition;
 
-import net.minecraft.util.EnumHand;
+import com.elfmcys.yesstevemodel.client.compat.Hand;
 
 public class ConditionalSwing extends AbstractConditionItem {
-    public ConditionalSwing(EnumHand hand) {
-        super(hand == EnumHand.MAIN_HAND ? "swing" : "swing_offhand");
+    public ConditionalSwing(Hand hand) {
+        super(hand == Hand.MAIN_HAND ? "swing" : "swing_offhand");
     }
 }

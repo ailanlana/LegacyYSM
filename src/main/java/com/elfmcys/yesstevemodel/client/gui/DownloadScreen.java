@@ -2,7 +2,7 @@ package com.elfmcys.yesstevemodel.client.gui;
 
 import com.elfmcys.yesstevemodel.client.gui.button.FlatColorButton;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.EnumChatFormatting;
 
 public class DownloadScreen extends Screen {
     private final PlayerModelScreen parent;
@@ -24,7 +24,7 @@ public class DownloadScreen extends Screen {
     @Override
     public void drawScreen(int pMouseX, int pMouseY, float pPartialTick) {
         this.drawDefaultBackground();
-        this.drawCenteredString(this.fontRenderer, TextFormatting.DARK_RED + "Coming Soooooooooooooooooooooooooon™", this.width / 2, this.height / 2 - 5, 0xFFFFFFFF);
+        this.drawCenteredString(this.fontRendererObj, EnumChatFormatting.DARK_RED + "Coming Soooooooooooooooooooooooooon™", this.width / 2, this.height / 2 - 5, 0xFFFFFFFF);
         super.drawScreen(pMouseX, pMouseY, pPartialTick);
     }
 }

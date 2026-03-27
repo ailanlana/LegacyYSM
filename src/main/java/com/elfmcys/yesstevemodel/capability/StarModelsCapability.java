@@ -1,17 +1,19 @@
 package com.elfmcys.yesstevemodel.capability;
 
+import com.elfmcys.yesstevemodel.YesSteveModel;
 import com.google.common.collect.Sets;
-import net.minecraft.nbt.NBTBase;
+import net.minecraft.entity.Entity;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.capabilities.Capability;
+import net.minecraft.world.World;
+import net.minecraftforge.common.IExtendedEntityProperties;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
-public class StarModelsCapability {
+public class StarModelsCapability implements IExtendedEntityProperties {
+    public static final String IDENTIFIER = new ResourceLocation(YesSteveModel.MOD_ID, "star_models").toString();
     private Set<ResourceLocation> starModels = Sets.newHashSet();
 
     public void addModel(ResourceLocation modelId) {
@@ -52,23 +54,24 @@ public class StarModelsCapability {
 
     public void deserializeNBT(NBTTagList nbt) {
         this.starModels.clear();
-        for (NBTBase tag : nbt) {
-            if (tag instanceof NBTTagString string) {
-                this.starModels.add(new ResourceLocation(string.getString()));
-            }
+        for (int i = 0; i < nbt.tagCount(); i++) {
+            this.starModels.add(new ResourceLocation(nbt.getStringTagAt(i)));
         }
     }
 
-    public static class Storage implements Capability.IStorage<StarModelsCapability> {
-        @Nullable
-        @Override
-        public NBTBase writeNBT(Capability<StarModelsCapability> capability, StarModelsCapability instance, EnumFacing side) {
-            return instance.serializeNBT();
-        }
+    @Override
+    public void saveNBTData(NBTTagCompound compound) {
+        compound.setTag(IDENTIFIER, this.serializeNBT());
+    }
 
-        @Override
-        public void readNBT(Capability<StarModelsCapability> capability, StarModelsCapability instance, EnumFacing side, NBTBase nbt) {
-            instance.deserializeNBT((NBTTagList) nbt);
+    @Override
+    public void loadNBTData(NBTTagCompound compound) {
+        if (compound.hasKey(IDENTIFIER)) {
+            this.deserializeNBT(compound.getTagList(IDENTIFIER, 8));
         }
+    }
+
+    @Override
+    public void init(Entity entity, World world) {
     }
 }

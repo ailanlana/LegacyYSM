@@ -2,15 +2,14 @@ package com.elfmcys.yesstevemodel.capability;
 
 import com.elfmcys.yesstevemodel.YesSteveModel;
 import com.elfmcys.yesstevemodel.config.ServerConfig;
-import net.minecraft.nbt.NBTBase;
+import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.capabilities.Capability;
+import net.minecraft.world.World;
+import net.minecraftforge.common.IExtendedEntityProperties;
 
-import javax.annotation.Nullable;
-
-public class ModelInfoCapability {
+public class ModelInfoCapability implements IExtendedEntityProperties {
+    public static final String IDENTIFIER = new ResourceLocation(YesSteveModel.MOD_ID, "model_id").toString();
     private ResourceLocation modelId = new ResourceLocation(YesSteveModel.MOD_ID, ServerConfig.DEFAULT_MODEL_ID);
     private ResourceLocation selectTexture = new ResourceLocation(YesSteveModel.MOD_ID, ServerConfig.DEFAULT_MODEL_ID + "/" + ServerConfig.DEFAULT_MODEL_TEXTURE);
     private String animation = "idle";
@@ -91,16 +90,19 @@ public class ModelInfoCapability {
         this.playAnimation = nbt.getBoolean("play_animation");
     }
 
-    public static class Storage implements Capability.IStorage<ModelInfoCapability> {
-        @Nullable
-        @Override
-        public NBTBase writeNBT(Capability<ModelInfoCapability> capability, ModelInfoCapability instance, EnumFacing side) {
-            return instance.serializeNBT();
-        }
+    @Override
+    public void saveNBTData(NBTTagCompound compound) {
+        compound.setTag(IDENTIFIER, this.serializeNBT());
+    }
 
-        @Override
-        public void readNBT(Capability<ModelInfoCapability> capability, ModelInfoCapability instance, EnumFacing side, NBTBase nbt) {
-            instance.deserializeNBT((NBTTagCompound) nbt);
+    @Override
+    public void loadNBTData(NBTTagCompound compound) {
+        if (compound.hasKey(IDENTIFIER)) {
+            this.deserializeNBT(compound.getCompoundTag(IDENTIFIER));
         }
+    }
+
+    @Override
+    public void init(Entity entity, World world) {
     }
 }

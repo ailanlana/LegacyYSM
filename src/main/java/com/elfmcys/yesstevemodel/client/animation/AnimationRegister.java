@@ -1,8 +1,9 @@
 package com.elfmcys.yesstevemodel.client.animation;
 
 import com.elfmcys.yesstevemodel.client.compat.ElytraCompat;
+import com.elfmcys.yesstevemodel.client.compat.EntityEquipmentSlot;
+import com.elfmcys.yesstevemodel.client.compat.SpectatorCompat;
 import com.elfmcys.yesstevemodel.client.compat.SwimmingCompat;
-import com.elfmcys.yesstevemodel.client.compat.TridentCompat;
 import com.elfmcys.yesstevemodel.client.entity.CustomPlayerEntity;
 import com.elfmcys.yesstevemodel.geckolib3.core.builder.ILoopType;
 import com.elfmcys.yesstevemodel.geckolib3.core.event.predicate.AnimationEvent;
@@ -13,18 +14,16 @@ import com.elfmcys.yesstevemodel.geckolib3.resource.GeckoLibCache;
 import com.elfmcys.yesstevemodel.geckolib3.util.MolangUtils;
 import com.elfmcys.yesstevemodel.util.EntityUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.item.EntityBoat;
-import net.minecraft.entity.passive.AbstractHorse;
+import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntityPig;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EnumPlayerModelParts;
 import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.entity.projectile.EntitySpectralArrow;
-import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.MathHelper;
 
 import java.util.function.BiPredicate;
 
@@ -33,9 +32,9 @@ public class AnimationRegister {
 
     public static void registerAnimationState() {
         register("death", ILoopType.EDefaultLoopTypes.PLAY_ONCE, Priority.HIGHEST, (player, event) -> !player.isEntityAlive());
-        if (TridentCompat.hasRiptide()) {
-            register("riptide", Priority.HIGHEST, (player, event) -> TridentCompat.isAutoSpinAttack(player));
-        }
+//        if (TridentCompat.hasRiptide()) {
+//            register("riptide", Priority.HIGHEST, (player, event) -> TridentCompat.isAutoSpinAttack(player));
+//        }
         register("sleep", Priority.HIGHEST, (player, event) -> player.isPlayerSleeping());
         if (SwimmingCompat.hasSwimming()) {
             register("swim", Priority.HIGHEST, (player, event) -> SwimmingCompat.isSwimming(player));
@@ -43,13 +42,13 @@ public class AnimationRegister {
             register("climbing", Priority.HIGHEST, (player, event) -> SwimmingCompat.isSwimmingPose(player));
         }
 
-        register("ride_pig", Priority.HIGH, (player, event) -> player.getRidingEntity() instanceof EntityPig);
-        register("ride", Priority.HIGH, (player, event) -> player.getRidingEntity() instanceof AbstractHorse);
-        register("boat", Priority.HIGH, (player, event) -> player.getRidingEntity() instanceof EntityBoat);
+        register("ride_pig", Priority.HIGH, (player, event) -> player.ridingEntity instanceof EntityPig);
+        register("ride", Priority.HIGH, (player, event) -> player.ridingEntity instanceof EntityHorse);
+        register("boat", Priority.HIGH, (player, event) -> player.ridingEntity instanceof EntityBoat);
         register("sit", Priority.HIGH, (player, event) -> player.isRiding());
 
         register("fly", Priority.HIGH, (player, event) -> player.capabilities.isFlying);
-        register("elytra_fly", Priority.HIGH, (player, event) -> player.isElytraFlying());
+        register("elytra_fly", Priority.HIGH, (player, event) -> ElytraCompat.isElytraFlying(player));
 
         register("swim_stand", Priority.NORMAL, (player, event) -> player.isInWater());
         register("attacked", ILoopType.EDefaultLoopTypes.PLAY_ONCE, Priority.NORMAL, (player, event) -> player.hurtTime > 0);
@@ -137,9 +136,9 @@ public class AnimationRegister {
         parser.register(new LazyVariable("ysm.is_passenger", MolangUtils.FALSE));
         parser.register(new LazyVariable("ysm.is_sleep", MolangUtils.FALSE));
         parser.register(new LazyVariable("ysm.is_sneak", MolangUtils.FALSE));
-        if (TridentCompat.hasRiptide()) {
-            parser.register(new LazyVariable("ysm.is_riptide", MolangUtils.FALSE));
-        }
+//        if (TridentCompat.hasRiptide()) {
+//            parser.register(new LazyVariable("ysm.is_riptide", MolangUtils.FALSE));
+//        }
 
         parser.register(new LazyVariable("ysm.armor_value", 0));
         parser.register(new LazyVariable("ysm.hurt_time", 0));
@@ -150,28 +149,28 @@ public class AnimationRegister {
 
     public static void setParserValue(AnimationEvent<CustomPlayerEntity> animationEvent, MolangParser parser, EntityModelData data, EntityPlayer player) {
         Minecraft mc = Minecraft.getMinecraft();
-        if (mc.world == null) {
+        if (mc.theWorld == null) {
             return;
         }
-        parser.setValue("query.actor_count", () -> mc.world.getLoadedEntityList().size());
+        parser.setValue("query.actor_count", () -> mc.theWorld.getLoadedEntityList().size());
 
         parser.setValue("query.body_x_rotation", () -> player.rotationPitch);
-        parser.setValue("query.body_y_rotation", () -> MathHelper.wrapDegrees(player.rotationYaw));
-        parser.setValue("query.cardinal_facing_2d", () -> player.getHorizontalFacing().getIndex());
-        parser.setValue("query.distance_from_camera", () -> EntityUtil.getCameraPosition(mc, 0).distanceTo(player.getPositionVector()));
+        parser.setValue("query.body_y_rotation", () -> MathHelper.wrapAngleTo180_float(player.rotationYaw));
+        parser.setValue("query.cardinal_facing_2d", () -> EntityUtil.getHorizontalIndex(player));
+        parser.setValue("query.distance_from_camera", () -> EntityUtil.getCameraPosition(mc, 0).distanceTo(EntityUtil.getPositionVector(player)));
         parser.setValue("query.equipment_count", () -> getEquipmentCount(player));
         parser.setValue("query.eye_target_x_rotation", () -> EntityUtil.getViewXRot(player, 0));
         parser.setValue("query.eye_target_y_rotation", () -> EntityUtil.getViewYRot(player, 0));
         parser.setValue("query.ground_speed", () -> EntityUtil.getGroundSpeed(player));
 
         parser.setValue("query.has_cape", () -> MolangUtils.booleanToFloat(hasCape(player)));
-        parser.setValue("query.has_rider", () -> MolangUtils.booleanToFloat(!player.isBeingRidden()));
+        parser.setValue("query.has_rider", () -> MolangUtils.booleanToFloat(player.riddenByEntity != null));
         parser.setValue("query.head_x_rotation", () -> data.netHeadYaw);
         parser.setValue("query.head_y_rotation", () -> data.headPitch);
         parser.setValue("query.health", player::getHealth);
         parser.setValue("query.hurt_time", () -> player.hurtTime);
 
-        parser.setValue("query.is_eating", () -> MolangUtils.booleanToFloat(player.getActiveItemStack().getItemUseAction() == EnumAction.EAT));
+        parser.setValue("query.is_eating", () -> MolangUtils.booleanToFloat(player.getItemInUse() != null && player.getItemInUse().getItemUseAction() == EnumAction.eat));
         parser.setValue("query.is_first_person", () -> MolangUtils.booleanToFloat(mc.gameSettings.thirdPersonView == 0));
         parser.setValue("query.is_in_water", () -> MolangUtils.booleanToFloat(player.isInWater()));
         parser.setValue("query.is_in_water_or_rain", () -> MolangUtils.booleanToFloat(player.isWet()));
@@ -182,23 +181,23 @@ public class AnimationRegister {
         parser.setValue("query.is_riding", () -> MolangUtils.booleanToFloat(player.isRiding()));
         parser.setValue("query.is_sleeping", () -> MolangUtils.booleanToFloat(player.isPlayerSleeping()));
         parser.setValue("query.is_sneaking", () -> MolangUtils.booleanToFloat(player.onGround && player.isSneaking()));
-        parser.setValue("query.is_spectator", () -> MolangUtils.booleanToFloat(player.isSpectator()));
+        parser.setValue("query.is_spectator", () -> MolangUtils.booleanToFloat(SpectatorCompat.isSpectator(player)));
         parser.setValue("query.is_sprinting", () -> MolangUtils.booleanToFloat(player.isSprinting()));
         if (SwimmingCompat.hasSwimming()) {
             parser.setValue("query.is_swimming", () -> MolangUtils.booleanToFloat(SwimmingCompat.isSwimming(player)));
         }
-        parser.setValue("query.is_using_item", () -> MolangUtils.booleanToFloat(player.isHandActive()));
-        parser.setValue("query.item_in_use_duration", () -> player.getItemInUseMaxCount() / 20.0);
+        parser.setValue("query.is_using_item", () -> MolangUtils.booleanToFloat(player.isUsingItem()));
+        parser.setValue("query.item_in_use_duration", () -> EntityUtil.getItemInUseMaxCount(player) / 20.0);
         parser.setValue("query.item_max_use_duration", () -> getMaxUseDuration(player) / 20.0);
         parser.setValue("query.item_remaining_use_duration", () -> player.getItemInUseCount() / 20.0);
 
         parser.setValue("query.max_health", player::getMaxHealth);
         parser.setValue("query.modified_distance_moved", () -> player.distanceWalkedModified);
-        parser.setValue("query.moon_phase", () -> mc.world.getMoonPhase());
+        parser.setValue("query.moon_phase", () -> mc.theWorld.getMoonPhase());
 
         parser.setValue("query.player_level", () -> player.experienceLevel);
-        parser.setValue("query.time_of_day", () -> MolangUtils.normalizeTime(mc.world.getWorldTime()));
-        parser.setValue("query.time_stamp", () -> mc.world.getWorldTime());
+        parser.setValue("query.time_of_day", () -> MolangUtils.normalizeTime(mc.theWorld.getWorldTime()));
+        parser.setValue("query.time_stamp", () -> mc.theWorld.getWorldTime());
         parser.setValue("query.vertical_speed", () -> EntityUtil.getVerticalSpeed(player));
         parser.setValue("query.walk_distance", () -> player.distanceWalkedOnStepModified);
         parser.setValue("query.yaw_speed", () -> getYawSpeed(animationEvent, player));
@@ -215,20 +214,20 @@ public class AnimationRegister {
 
         parser.setValue("ysm.has_elytra", () -> MolangUtils.booleanToFloat(ElytraCompat.isWearingElytra(player)));
         parser.setValue("ysm.elytra_rot_x", () -> {
-            if (player instanceof EntityPlayerSP clientPlayer) {
-                return Math.toDegrees(clientPlayer.rotateElytraX);
+            if (player instanceof AbstractClientPlayer clientPlayer) {
+                return Math.toDegrees(ElytraCompat.getRotateElytraX(clientPlayer));
             }
             return 0;
         });
         parser.setValue("ysm.elytra_rot_y", () -> {
-            if (player instanceof EntityPlayerSP clientPlayer) {
-                return Math.toDegrees(clientPlayer.rotateElytraY);
+            if (player instanceof AbstractClientPlayer clientPlayer) {
+                return Math.toDegrees(ElytraCompat.getRotateElytraY(clientPlayer));
             }
             return 0;
         });
         parser.setValue("ysm.elytra_rot_z", () -> {
-            if (player instanceof EntityPlayerSP clientPlayer) {
-                return Math.toDegrees(clientPlayer.rotateElytraZ);
+            if (player instanceof AbstractClientPlayer clientPlayer) {
+                return Math.toDegrees(ElytraCompat.getRotateElytraZ(clientPlayer));
             }
             return 0;
         });
@@ -237,9 +236,9 @@ public class AnimationRegister {
         parser.setValue("ysm.is_passenger", () -> MolangUtils.booleanToFloat(player.isRiding()));
         parser.setValue("ysm.is_sleep", () -> MolangUtils.booleanToFloat(player.isPlayerSleeping()));
         parser.setValue("ysm.is_sneak", () -> MolangUtils.booleanToFloat(player.onGround && player.isSneaking()));
-        if (TridentCompat.hasRiptide()) {
-            parser.setValue("ysm.is_riptide", () -> MolangUtils.booleanToFloat(TridentCompat.isAutoSpinAttack(player)));
-        }
+//        if (TridentCompat.hasRiptide()) {
+//            parser.setValue("ysm.is_riptide", () -> MolangUtils.booleanToFloat(TridentCompat.isAutoSpinAttack(player)));
+//        }
 
         parser.setValue("ysm.armor_value", player::getTotalArmorValue);
         parser.setValue("ysm.hurt_time", () -> player.hurtTime);
@@ -253,26 +252,26 @@ public class AnimationRegister {
     // TODO：补全
     public static void setArrowParserValue(EntityArrow arrow, MolangParser parser) {
         parser.setValue("query.body_x_rotation", () -> arrow.rotationPitch);
-        parser.setValue("query.body_y_rotation", () -> MathHelper.wrapDegrees(arrow.rotationYaw));
+        parser.setValue("query.body_y_rotation", () -> MathHelper.wrapAngleTo180_float(arrow.rotationYaw));
         parser.setValue("query.is_on_ground", () -> MolangUtils.booleanToFloat(arrow.inGround));
         parser.setValue("query.ground_speed", () -> EntityUtil.getGroundSpeed(arrow));
         parser.setValue("query.vertical_speed", () -> EntityUtil.getVerticalSpeed(arrow));
         parser.setValue("ysm.in_ground", () -> MolangUtils.booleanToFloat(arrow.inGround));
-        parser.setValue("ysm.on_ground_time", () -> arrow.timeInGround);
-        parser.setValue("ysm.is_spectral_arrow", () -> MolangUtils.booleanToFloat(arrow instanceof EntitySpectralArrow));
+//        parser.setValue("ysm.on_ground_time", () -> arrow.timeInGround);
+//        parser.setValue("ysm.is_spectral_arrow", () -> MolangUtils.booleanToFloat(arrow instanceof EntitySpectralArrow));
     }
 
     private static boolean hasCape(EntityPlayer player) {
         if (player instanceof EntityPlayerSP clientPlayer) {
-            return clientPlayer.hasPlayerInfo() && !player.isInvisible() && clientPlayer.isWearing(EnumPlayerModelParts.CAPE) && clientPlayer.getLocationCape() != null;
+            return clientPlayer.func_152122_n() && !clientPlayer.isInvisible() && !clientPlayer.getHideCape();
         }
         return false;
     }
 
     private static int getEquipmentCount(EntityPlayer player) {
         int count = 0;
-        for (ItemStack s : player.getArmorInventoryList()) {
-            if (!s.isEmpty()) {
+        for (int i = 1; i <= 4; i++) {
+            if (player.getEquipmentInSlot(i) != null) {
                 count += 1;
             }
         }
@@ -280,8 +279,8 @@ public class AnimationRegister {
     }
 
     private static double getMaxUseDuration(EntityPlayer player) {
-        ItemStack useItem = player.getActiveItemStack();
-        if (useItem.isEmpty()) {
+        ItemStack useItem = player.getItemInUse();
+        if (useItem == null) {
             return 0.0;
         } else {
             return useItem.getMaxItemUseDuration();
@@ -309,6 +308,6 @@ public class AnimationRegister {
     }
 
     private static double getSlotValue(EntityPlayer player, EntityEquipmentSlot slot) {
-        return MolangUtils.booleanToFloat(!player.getItemStackFromSlot(slot).isEmpty());
+        return MolangUtils.booleanToFloat(slot.getItemStackFromSlot(player) != null);
     }
 }

@@ -68,12 +68,12 @@ public class MatrixStack {
 
     public void moveToPivot(GeoCube cube) {
         Vector3f pivot = cube.pivot;
-        this.translate(pivot.getX() / 16f, pivot.getY() / 16f, pivot.getZ() / 16f);
+        this.translate(pivot.x / 16f, pivot.y / 16f, pivot.z / 16f);
     }
 
     public void moveBackFromPivot(GeoCube cube) {
         Vector3f pivot = cube.pivot;
-        this.translate(-pivot.getX() / 16f, -pivot.getY() / 16f, -pivot.getZ() / 16f);
+        this.translate(-pivot.x / 16f, -pivot.y / 16f, -pivot.z / 16f);
     }
 
     public void moveToPivot(GeoBone bone) {
@@ -92,17 +92,17 @@ public class MatrixStack {
 
     public void scale(float x, float y, float z) {
         this.tempModelMatrix.setIdentity();
-        this.tempModelMatrix.setM00(x);
-        this.tempModelMatrix.setM11(y);
-        this.tempModelMatrix.setM22(z);
+        this.tempModelMatrix.m00 = x;
+        this.tempModelMatrix.m11 = y;
+        this.tempModelMatrix.m22 = z;
 
         this.model.peek().mul(this.tempModelMatrix);
 
         if (x < 0 || y < 0 || z < 0) {
             this.tempNormalMatrix.setIdentity();
-            this.tempNormalMatrix.setM00(x < 0 ? -1 : 1);
-            this.tempNormalMatrix.setM11(y < 0 ? -1 : 1);
-            this.tempNormalMatrix.setM22(z < 0 ? -1 : 1);
+            this.tempNormalMatrix.m00 = x < 0 ? -1 : 1;
+            this.tempNormalMatrix.m11 = y < 0 ? -1 : 1;
+            this.tempNormalMatrix.m22 = z < 0 ? -1 : 1;
 
             this.normal.peek().mul(this.tempNormalMatrix);
         }
@@ -172,23 +172,23 @@ public class MatrixStack {
         Matrix3f matrix3f = new Matrix3f();
 
         this.tempModelMatrix.setIdentity();
-        matrix4f.rotZ(rotation.getZ());
+        matrix4f.rotZ(rotation.z);
         this.tempModelMatrix.mul(matrix4f);
 
-        matrix4f.rotY(rotation.getY());
+        matrix4f.rotY(rotation.y);
         this.tempModelMatrix.mul(matrix4f);
 
-        matrix4f.rotX(rotation.getX());
+        matrix4f.rotX(rotation.x);
         this.tempModelMatrix.mul(matrix4f);
 
         this.tempNormalMatrix.setIdentity();
-        matrix3f.rotZ(rotation.getZ());
+        matrix3f.rotZ(rotation.z);
         this.tempNormalMatrix.mul(matrix3f);
 
-        matrix3f.rotY(rotation.getY());
+        matrix3f.rotY(rotation.y);
         this.tempNormalMatrix.mul(matrix3f);
 
-        matrix3f.rotX(rotation.getX());
+        matrix3f.rotX(rotation.z);
         this.tempNormalMatrix.mul(matrix3f);
 
         this.model.peek().mul(this.tempModelMatrix);

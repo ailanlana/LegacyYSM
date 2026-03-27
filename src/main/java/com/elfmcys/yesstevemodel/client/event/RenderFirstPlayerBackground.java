@@ -1,6 +1,5 @@
 package com.elfmcys.yesstevemodel.client.event;
 
-import com.elfmcys.yesstevemodel.YesSteveModel;
 import com.elfmcys.yesstevemodel.client.ClientProxy;
 import com.elfmcys.yesstevemodel.client.config.GeneralConfig;
 import com.elfmcys.yesstevemodel.client.entity.CustomPlayerEntity;
@@ -13,26 +12,20 @@ import com.elfmcys.yesstevemodel.geckolib3.resource.GeckoLibCache;
 import com.elfmcys.yesstevemodel.mclib.utils.Interpolations;
 import com.elfmcys.yesstevemodel.util.AnimatableCacheUtil;
 import com.elfmcys.yesstevemodel.util.ModelIdUtil;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.opengl.GL11;
 
 import java.util.concurrent.ExecutionException;
 
 // TODO：测试
-@Mod.EventBusSubscriber(value = Side.CLIENT, modid = YesSteveModel.MOD_ID)
 public class RenderFirstPlayerBackground {
     private static final String NAME = "Background";
     /**
@@ -41,19 +34,19 @@ public class RenderFirstPlayerBackground {
     private static boolean ALREADY_RENDERED = false;
 
     @SubscribeEvent
-    public static void onRenderLevelLase(RenderWorldLastEvent event) {
+    public void onRenderLevelLase(RenderWorldLastEvent event) {
         ALREADY_RENDERED = false;
     }
 
     @SubscribeEvent
-    public static void onRenderHand(RenderHandEvent event) {
+    public void onRenderHand(RenderHandEvent event) {
         if (GeneralConfig.DISABLE_SELF_MODEL) {
             return;
         }
         if (GeneralConfig.DISABLE_SELF_HANDS) {
             return;
         }
-        EntityPlayerSP player = Minecraft.getMinecraft().player;
+        EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
         if (player == null || ALREADY_RENDERED) {
             return;
         }
@@ -65,8 +58,7 @@ public class RenderFirstPlayerBackground {
                 return;
             }
             CustomPlayerRenderer instance = ClientProxy.getInstance();
-            Tessellator tess = Tessellator.getInstance();
-            BufferBuilder buffer = tess.getBuffer();
+            Tessellator tess = Tessellator.instance;
             IAnimatable animatable;
 
             try {
@@ -84,16 +76,16 @@ public class RenderFirstPlayerBackground {
                 if (MinecraftForge.EVENT_BUS.post(new SpecialPlayerRenderEvent(player, customPlayer, modelId))) {
                     return;
                 }
-                buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR_NORMAL);
+                tess.startDrawingQuads();
                 if (instance != null) {
-                    GlStateManager.pushMatrix();
+                    GL11.glPushMatrix();
                     if (Minecraft.getMinecraft().gameSettings.viewBobbing) {
-                        bobView(event.getPartialTicks(), player);
+                        bobView(event.partialTicks, player);
                     }
-                    GlStateManager.translate(0, -1.5, 0);
+                    GL11.glTranslated(0, -1.5, 0);
                     geoModel.getTopLevelBone(NAME).ifPresent(bone -> instance.renderRecursively(bone, tess, 1.0F, 1.0F, 1.0F, 1.0F));
                     tess.draw();
-                    GlStateManager.popMatrix();
+                    GL11.glPopMatrix();
                 }
             }
         });
@@ -103,8 +95,8 @@ public class RenderFirstPlayerBackground {
         float walk = player.distanceWalkedModified - player.prevDistanceWalkedModified;
         float walk2 = -(player.distanceWalkedModified + walk * pPartialTicks);
         float lerp = Interpolations.lerp(player.prevCameraYaw, player.cameraYaw, pPartialTicks);
-        GlStateManager.translate(-MathHelper.sin(walk2 * (float) Math.PI) * lerp * 0.5F, Math.abs(MathHelper.cos(walk2 * (float) Math.PI) * lerp), 0.0D);
-        GlStateManager.rotate(MathHelper.sin(walk2 * (float) Math.PI) * lerp * 3.0F, 0, 0, 1);
-        GlStateManager.rotate(Math.abs(MathHelper.cos(walk2 * (float) Math.PI - 0.2F) * lerp) * 5.0F, 1, 0, 0);
+        GL11.glTranslated(-MathHelper.sin(walk2 * (float) Math.PI) * lerp * 0.5F, Math.abs(MathHelper.cos(walk2 * (float) Math.PI) * lerp), 0.0D);
+        GL11.glRotatef(MathHelper.sin(walk2 * (float) Math.PI) * lerp * 3.0F, 0, 0, 1);
+        GL11.glRotatef(Math.abs(MathHelper.cos(walk2 * (float) Math.PI - 0.2F) * lerp) * 5.0F, 1, 0, 0);
     }
 }

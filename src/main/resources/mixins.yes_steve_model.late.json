@@ -1,0 +1,8 @@
+{
+  "package": "com.elfmcys.yesstevemodel.mixin.late",
+  "required": true,
+  "refmap": "mixins.yes_steve_model.refmap.json",
+  "target": "@env(DEFAULT)",
+  "minVersion": "0.8.5-GTNH",
+  "compatibilityLevel": "JAVA_8"
+}

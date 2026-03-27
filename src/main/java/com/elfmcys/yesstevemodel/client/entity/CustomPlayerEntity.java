@@ -2,6 +2,7 @@ package com.elfmcys.yesstevemodel.client.entity;
 
 import com.elfmcys.yesstevemodel.client.ClientModelManager;
 import com.elfmcys.yesstevemodel.client.animation.AnimationManager;
+import com.elfmcys.yesstevemodel.client.compat.EntityEquipmentSlot;
 import com.elfmcys.yesstevemodel.client.model.CustomPlayerModel;
 import com.elfmcys.yesstevemodel.geckolib3.core.IAnimatable;
 import com.elfmcys.yesstevemodel.geckolib3.core.PlayState;
@@ -14,7 +15,6 @@ import com.elfmcys.yesstevemodel.geckolib3.core.manager.AnimationFactory;
 import com.elfmcys.yesstevemodel.geckolib3.resource.GeckoLibCache;
 import com.elfmcys.yesstevemodel.geckolib3.util.GeckoLibUtil;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 
 public class CustomPlayerEntity implements IAnimatable {
     private final AnimationFactory factory = GeckoLibUtil.createFactory(this, true);
-    private final ItemStack[] handItemsForAnimation = new ItemStack[]{ItemStack.EMPTY, ItemStack.EMPTY};
+    private final ItemStack[] handItemsForAnimation = new ItemStack[]{null, null};
     private ResourceLocation mainModel = CustomPlayerModel.DEFAULT_MAIN_MODEL;
     private ResourceLocation texture = CustomPlayerModel.DEFAULT_TEXTURE;
     private String previewAnimation = "";

@@ -15,13 +15,13 @@ public class TextureCountButton extends FlatColorButton {
     }
 
     @Override
-    public void drawButton(@Nonnull Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    public void drawButton(@Nonnull Minecraft mc, int mouseX, int mouseY) {
         this.updateDisplayString();
-        super.drawButton(mc, mouseX, mouseY, partialTicks);
+        super.drawButton(mc, mouseX, mouseY);
     }
 
     private void updateDisplayString() {
-        EntityPlayerSP player = Minecraft.getMinecraft().player;
+        EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
         CapabilityEvent.getModelInfoCap(player).ifPresent(cap -> {
             ResourceLocation modelId = cap.getModelId();
             if (ClientModelManager.MODELS.containsKey(modelId)) {

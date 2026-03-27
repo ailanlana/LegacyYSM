@@ -1,25 +1,24 @@
 package com.elfmcys.yesstevemodel.client.gui;
 
+import com.elfmcys.yesstevemodel.client.compat.KeyCompat;
 import com.elfmcys.yesstevemodel.client.gui.button.Button;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.client.settings.KeyConflictContext;
-import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Screen extends GuiScreen {
     @Override
-    protected void actionPerformed(@Nonnull GuiButton guiButton) throws IOException {
+    protected void actionPerformed(@Nonnull GuiButton guiButton) {
         if (guiButton instanceof Button button) {
             button.onPress();
             return;
@@ -33,7 +32,7 @@ public class Screen extends GuiScreen {
     private int laseMouseY;
 
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int button) throws IOException {
+    protected void mouseClicked(int mouseX, int mouseY, int button) {
         if (button == LEFT_MOUSE_BUTTON || button == RIGHT_MOUSE_BUTTON) {
             this.lastMouseX = mouseX;
             this.laseMouseY = mouseY;
@@ -52,7 +51,7 @@ public class Screen extends GuiScreen {
     }
 
     @Override
-    public void handleMouseInput() throws IOException {
+    public void handleMouseInput() {
         super.handleMouseInput();
         int dWheel = Mouse.getEventDWheel();
         if (dWheel != 0) {
@@ -68,13 +67,19 @@ public class Screen extends GuiScreen {
     }
 
     @Override
-    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+    protected void keyTyped(char typedChar, int keyCode) {
         if (this.canGuiClose(keyCode)) super.keyTyped(typedChar, Keyboard.KEY_ESCAPE);
         else if (keyCode != Keyboard.KEY_ESCAPE) super.keyTyped(typedChar, keyCode); // 保留兼容
     }
 
     protected boolean canGuiClose(int keyCode) {
         return keyCode == Keyboard.KEY_ESCAPE;
+    }
+
+    @SuppressWarnings("UnusedReturnValue")
+    protected <T extends GuiButton> T addButton(T buttonIn) {
+        this.buttonList.add(buttonIn);
+        return buttonIn;
     }
 
     /**
@@ -89,6 +94,13 @@ public class Screen extends GuiScreen {
     }
 
     /**
+     * Called when the GUI is resized in order to update the world and the resolution
+     */
+    public void onResize(@Nonnull Minecraft mc, int width, int height) {
+        this.setWorldAndResolution(mc, width, height);
+    }
+
+    /**
      * List string to width and draw text which contains "\n" or "\\n".
      *
      * @return The relative y pos of the last line.
@@ -99,11 +111,11 @@ public class Screen extends GuiScreen {
         if (text == null) return currentY;
         for (String line : this.listLineBreakStringToWidth(text, wrapWidth)) {
             if (line.isEmpty()) {
-                currentY += this.fontRenderer.FONT_HEIGHT;
+                currentY += this.fontRendererObj.FONT_HEIGHT;
                 continue;
             }
-            this.drawString(this.fontRenderer, line, x, y + currentY, color);
-            currentY += this.fontRenderer.FONT_HEIGHT;
+            this.drawString(this.fontRendererObj, line, x, y + currentY, color);
+            currentY += this.fontRendererObj.FONT_HEIGHT;
         }
         return currentY;
     }
@@ -122,15 +134,34 @@ public class Screen extends GuiScreen {
                 lineList.add("");
                 continue;
             }
-            lineList.addAll(this.fontRenderer.listFormattedStringToWidth(para, wrapWidth));
+            lineList.addAll(this.fontRendererObj.listFormattedStringToWidth(para, wrapWidth));
         }
         return lineList;
     }
 
-    /**
-     * {@link KeyBinding#isActiveAndMatches(int)}，但是不检测 {@link KeyConflictContext#isActive()}。
-     */
+    public static boolean isAltKeyDown() {
+        return Keyboard.isKeyDown(Keyboard.KEY_LMENU) || Keyboard.isKeyDown(Keyboard.KEY_RMENU);
+    }
+
     public static boolean isKeyActiveIgnoreConflict(KeyBinding keyBinding, int keyCode) {
-        return keyCode != 0 && keyCode == keyBinding.getKeyCode() && keyBinding.getKeyModifier().equals(KeyModifier.getActiveModifier());
+        return keyCode != 0 && keyCode == keyBinding.getKeyCode() && KeyCompat.getModifier(keyBinding).equals(KeyCompat.getActiveModifier());
+    }
+
+    /**
+     * Draws a List of strings as a tooltip. Every entry is drawn on a separate line.
+     *
+     * @deprecated Use {@link #drawHoveringText(List, int, int)}.
+     */
+    @Deprecated
+    @Override
+    protected void func_146283_a(List<String> textLines, int x, int y) {
+        this.drawHoveringText(textLines, x, y);
+    }
+
+    /**
+     * Draws a List of strings as a tooltip. Every entry is drawn on a separate line.
+     */
+    public void drawHoveringText(List<String> textLines, int x, int y) {
+        super.func_146283_a(textLines, x, y);
     }
 }

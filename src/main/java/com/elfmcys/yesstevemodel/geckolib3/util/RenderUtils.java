@@ -2,24 +2,24 @@ package com.elfmcys.yesstevemodel.geckolib3.util;
 
 import com.elfmcys.yesstevemodel.geckolib3.core.util.MathUtil;
 import com.elfmcys.yesstevemodel.geckolib3.geo.render.built.GeoBone;
-import net.minecraft.client.renderer.GlStateManager;
+import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
 public final class RenderUtils {
     public static void translateMatrixToBone(GeoBone bone) {
-        GlStateManager.translate(-bone.getPositionX() / 16f, bone.getPositionY() / 16f, bone.getPositionZ() / 16f);
+        GL11.glTranslatef(-bone.getPositionX() / 16f, bone.getPositionY() / 16f, bone.getPositionZ() / 16f);
     }
 
     public static void rotateMatrixAroundBone(GeoBone bone) {
         if (bone.getRotationZ() != 0.0F) {
-            GlStateManager.rotate(MathUtil.radiansToDegrees(bone.getRotationZ()), 0, 0, 1);
+            GL11.glRotatef(MathUtil.radiansToDegrees(bone.getRotationZ()), 0, 0, 1);
         }
         if (bone.getRotationY() != 0.0F) {
-            GlStateManager.rotate(MathUtil.radiansToDegrees(bone.getRotationY()), 0, 1, 0);
+            GL11.glRotatef(MathUtil.radiansToDegrees(bone.getRotationY()), 0, 1, 0);
         }
         if (bone.getRotationX() != 0.0F) {
-            GlStateManager.rotate(MathUtil.radiansToDegrees(bone.getRotationX()), 1, 0, 0);
+            GL11.glRotatef(MathUtil.radiansToDegrees(bone.getRotationX()), 1, 0, 0);
         }
     }
 
@@ -30,16 +30,16 @@ public final class RenderUtils {
         float scaleX = bone.getScaleX();
         float scaleY = bone.getScaleY();
         float scaleZ = bone.getScaleZ();
-        GlStateManager.scale(scaleX, scaleY, scaleZ);
+        GL11.glScalef(scaleX, scaleY, scaleZ);
         return scaleX == 0 && scaleY == 0 && scaleZ == 0;
     }
 
     public static void translateToPivotPoint(GeoBone bone) {
-        GlStateManager.translate(bone.rotationPointX / 16f, bone.rotationPointY / 16f, bone.rotationPointZ / 16f);
+        GL11.glTranslatef(bone.rotationPointX / 16f, bone.rotationPointY / 16f, bone.rotationPointZ / 16f);
     }
 
     public static void translateAwayFromPivotPoint(GeoBone bone) {
-        GlStateManager.translate(-bone.rotationPointX / 16f, -bone.rotationPointY / 16f, -bone.rotationPointZ / 16f);
+        GL11.glTranslatef(-bone.rotationPointX / 16f, -bone.rotationPointY / 16f, -bone.rotationPointZ / 16f);
     }
 
     /**

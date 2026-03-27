@@ -1,22 +1,23 @@
 package com.elfmcys.yesstevemodel.network.message;
 
 import com.elfmcys.yesstevemodel.event.CapabilityEvent;
+import com.elfmcys.yesstevemodel.network.message.util.ExtendedBuffer;
 import com.google.common.collect.Sets;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.Set;
 
-public class SyncAuthModels implements IPacketBufferMessage {
+public class SyncAuthModels implements IExtendedBufferMessage {
     private Set<ResourceLocation> authModels;
 
+    @SuppressWarnings("unused")
     public SyncAuthModels() {
     }
 
@@ -25,19 +26,19 @@ public class SyncAuthModels implements IPacketBufferMessage {
     }
 
     @Override
-    public void toBytes(PacketBuffer buf) {
-        buf.writeVarInt(this.authModels.size());
+    public void toBytes(ExtendedBuffer buf) {
+        buf.writeVarIntToBuffer(this.authModels.size());
         for (ResourceLocation modelId : this.authModels) {
-            buf.writeResourceLocation(modelId);
+            buf.writeResourceLocationToBuffer(modelId);
         }
     }
 
     @Override
-    public void fromBytes(PacketBuffer buf) {
-        int size = buf.readVarInt();
+    public void fromBytes(ExtendedBuffer buf) {
+        int size = buf.readVarIntFromBuffer();
         Set<ResourceLocation> tmp = Sets.newHashSet();
         for (int i = 0; i < size; i++) {
-            tmp.add(buf.readResourceLocation());
+            tmp.add(buf.readResourceLocationFromBuffer());
         }
         this.authModels = tmp;
     }
@@ -55,11 +56,9 @@ public class SyncAuthModels implements IPacketBufferMessage {
         @SideOnly(Side.CLIENT)
         private static void handleCapability(SyncAuthModels message) {
             Minecraft mc = Minecraft.getMinecraft();
-            mc.addScheduledTask(() -> {
-                if (mc.player != null) {
-                    CapabilityEvent.getAuthModelsCap(mc.player).ifPresent(cap -> cap.setAuthModels(message.authModels));
-                }
-            });
+            if (mc.thePlayer != null) {
+                CapabilityEvent.getAuthModelsCap(mc.thePlayer).ifPresent(cap -> cap.setAuthModels(message.authModels));
+            }
         }
     }
 }

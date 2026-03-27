@@ -2,8 +2,8 @@ package com.elfmcys.yesstevemodel.client.compat;
 
 import com.fuzs.aquaacrobatics.entity.Pose;
 import com.fuzs.aquaacrobatics.entity.player.IPlayerResizeable;
+import cpw.mods.fml.common.Optional;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.common.Optional;
 
 public class SwimmingCompat {
     public static boolean hasSwimming() {

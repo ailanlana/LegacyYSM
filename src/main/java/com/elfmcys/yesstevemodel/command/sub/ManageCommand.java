@@ -10,7 +10,6 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
 import org.apache.commons.io.FileUtils;
 
 import javax.annotation.Nonnull;
@@ -24,26 +23,26 @@ public class ManageCommand extends CommandBase {
 
     @Nonnull
     @Override
-    public String getName() {
+    public String getCommandName() {
         return MANAGE_NAME;
     }
 
     @Nonnull
     @Override
-    public String getUsage(@Nonnull ICommandSender sender) {
+    public String getCommandUsage(@Nonnull ICommandSender sender) {
         return "commands.yes_steve_model.manage.usage";
     }
 
     // 4 级命令，省去重写
 
     @Override
-    public void execute(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args) throws CommandException {
-        if (args.length != 0) throw new WrongUsageException(this.getUsage(sender));
+    public void processCommand(@Nonnull ICommandSender sender, @Nonnull String[] args) throws CommandException {
+        if (args.length != 0) throw new WrongUsageException(this.getCommandUsage(sender));
         this.exportModel(sender);
     }
 
     private void exportModel(ICommandSender sender) throws CommandException {
-        if (sender.canUseCommand(4, this.getName())) {
+        if (sender.canCommandSenderUseCommand(4, this.getCommandName())) {
             EntityPlayerMP player = getCommandSenderAsPlayer(sender);
             List<RequestServerModelInfo.Info> builtinInfo = getFilesInfo(ServerModelManager.BUILTIN);
             List<RequestServerModelInfo.Info> customInfo = getFilesInfo(ServerModelManager.CUSTOM);

@@ -1,15 +1,15 @@
 package com.elfmcys.yesstevemodel.geckolib3.geo.render.built;
 
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.Vec3i;
+import com.elfmcys.yesstevemodel.geckolib3.util.Vec3i;
+import net.minecraftforge.common.util.ForgeDirection;
 
 public class GeoQuad {
     public GeoVertex[] vertices;
     public final Vec3i normal;
-    public EnumFacing direction;
+    public ForgeDirection direction;
 
     public GeoQuad(GeoVertex[] verticesIn, float u1, float v1, float uSize, float vSize, float texWidth,
-                   float texHeight, Boolean mirrorIn, EnumFacing directionIn) {
+                   float texHeight, Boolean mirrorIn, ForgeDirection directionIn) {
         this.direction = directionIn;
         this.vertices = verticesIn;
 
@@ -51,11 +51,11 @@ public class GeoQuad {
         // only god knows what this does, but eliot told me it generates a normal vector
         // which helps the game do lighting properly or something idk i didnt pay
         // attention in physics we were in remote learning gimme a break
-        this.normal = directionIn.getDirectionVec();
+        this.normal = new Vec3i(directionIn.offsetX, directionIn.offsetY, directionIn.offsetZ);
     }
 
     public GeoQuad(GeoVertex[] verticesIn, double[] uvCoords, double[] uvSize, float texWidth, float texHeight,
-                   Boolean mirrorIn, EnumFacing directionIn) {
+                   Boolean mirrorIn, ForgeDirection directionIn) {
         this(verticesIn, (float) uvCoords[0], (float) uvCoords[1], (float) uvSize[0], (float) uvSize[1], texWidth,
                 texHeight, mirrorIn, directionIn);
     }

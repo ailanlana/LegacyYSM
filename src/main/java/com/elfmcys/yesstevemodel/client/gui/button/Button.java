@@ -3,10 +3,11 @@ package com.elfmcys.yesstevemodel.client.gui.button;
 import com.elfmcys.yesstevemodel.mclib.utils.Interpolations;
 import com.elfmcys.yesstevemodel.util.RenderUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.util.MathHelper;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
@@ -24,24 +25,24 @@ public class Button extends GuiButton {
     }
 
     @Override
-    public void drawButton(@Nonnull Minecraft mc, int mouseX, int mouseY, float pPartialTick) {
+    public void drawButton(@Nonnull Minecraft mc, int mouseX, int mouseY) {
         if (!this.visible) return;
-        this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-        GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        this.renderWidget(mc, mouseX, mouseY, pPartialTick);
+        this.field_146123_n = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GL11.glEnable(GL11.GL_BLEND);
+        OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
+        this.renderWidget(mc, mouseX, mouseY);
         this.mouseDragged(mc, mouseX, mouseY);
     }
 
     /**
      * 纯粹的绘制方法，不需要再写悬停检测。
      */
-    protected void renderWidget(@Nonnull Minecraft mc, int mouseX, int mouseY, float pPartialTick) {
+    protected void renderWidget(@Nonnull Minecraft mc, int mouseX, int mouseY) {
         int i = this.getHoverState(this.isMouseOver());
-        mc.getTextureManager().bindTexture(BUTTON_TEXTURES);
-        this.drawTexturedModalRect(this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
-        this.drawTexturedModalRect(this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
+        mc.getTextureManager().bindTexture(buttonTextures);
+        this.drawTexturedModalRect(this.xPosition, this.yPosition, 0, 46 + i * 20, this.width / 2, this.height);
+        this.drawTexturedModalRect(this.xPosition + this.width / 2, this.yPosition, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
         this.renderString(mc.fontRenderer, this.getFGColor());
     }
 
@@ -51,9 +52,9 @@ public class Button extends GuiButton {
 
     @SuppressWarnings("SameParameterValue")
     protected void renderScrollingString(FontRenderer font, int width, int color) {
-        int i = this.x + width;
-        int j = this.x + this.width - width;
-        this.renderScrollingString(font, this.displayString, i, this.y, j, this.y + this.height, color);
+        int i = this.xPosition + width;
+        int j = this.xPosition + this.width - width;
+        this.renderScrollingString(font, this.displayString, i, this.yPosition, j, this.yPosition + this.height, color);
     }
 
     protected void renderScrollingString(FontRenderer font, String text, int minX, int minY, int maxX, int maxY, int color) {
@@ -74,7 +75,7 @@ public class Button extends GuiButton {
             this.drawString(font, text, minX - (int) d3, j, color);
             GL11.glDisable(GL11.GL_SCISSOR_TEST);
         } else {
-            int i1 = MathHelper.clamp(centerX, minX + i / 2, maxX - i / 2);
+            int i1 = MathHelper.clamp_int(centerX, minX + i / 2, maxX - i / 2);
             this.drawCenteredString(font, text, i1, j, color);
         }
     }
@@ -84,7 +85,7 @@ public class Button extends GuiButton {
             return this.packedFGColour;
         } else if (!this.enabled) {
             return 0xA0A0A0;
-        } else if (this.hovered) {
+        } else if (this.isMouseOver()) {
             return 0xFFFFA0;
         } else {
             return 0xE0E0E0;
@@ -96,5 +97,36 @@ public class Button extends GuiButton {
      */
     public void onPress() {
         this.onPress.accept(this);
+    }
+
+    /**
+     * Whether the mouse cursor is currently over the button.
+     *
+     * @deprecated Use {@link #isMouseOver()}.
+     */
+    @Deprecated
+    @Override
+    public boolean func_146115_a() {
+        return this.isMouseOver();
+    }
+
+    /**
+     * Whether the mouse cursor is currently over the button.
+     */
+    public boolean isMouseOver() {
+        return super.func_146115_a();
+    }
+
+    /**
+     * @deprecated Use {@link #playPressSound(SoundHandler)}.
+     */
+    @Deprecated
+    @Override
+    public void func_146113_a(SoundHandler soundHandlerIn) {
+        this.playPressSound(soundHandlerIn);
+    }
+
+    public void playPressSound(SoundHandler soundHandlerIn) {
+        super.func_146113_a(soundHandlerIn);
     }
 }

@@ -2,7 +2,6 @@ package com.elfmcys.yesstevemodel.client.renderer;
 
 import com.elfmcys.yesstevemodel.client.entity.CustomPlayerEntity;
 import com.elfmcys.yesstevemodel.client.model.CustomPlayerModel;
-import com.elfmcys.yesstevemodel.client.renderer.layer.CustomPlayerElytraLayer;
 import com.elfmcys.yesstevemodel.client.renderer.layer.CustomPlayerItemInHandLayer;
 import com.elfmcys.yesstevemodel.event.CapabilityEvent;
 import com.elfmcys.yesstevemodel.event.api.SpecialPlayerRenderEvent;
@@ -10,7 +9,6 @@ import com.elfmcys.yesstevemodel.geckolib3.geo.GeoReplacedEntityRenderer;
 import com.elfmcys.yesstevemodel.geckolib3.geo.render.built.GeoModel;
 import com.elfmcys.yesstevemodel.geckolib3.resource.GeckoLibCache;
 import com.elfmcys.yesstevemodel.util.ModelIdUtil;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -22,14 +20,14 @@ public class CustomPlayerRenderer extends GeoReplacedEntityRenderer<EntityPlayer
     private GeoModel geoModel;
 
     @SuppressWarnings("all")
-    public CustomPlayerRenderer(RenderManager ctx) {
-        super(ctx, new CustomPlayerModel(), new CustomPlayerEntity());
+    public CustomPlayerRenderer() {
+        super(new CustomPlayerModel(), new CustomPlayerEntity());
         this.addLayer(new CustomPlayerItemInHandLayer<>(this));
-        this.addLayer(new CustomPlayerElytraLayer<>(this));
+        //this.addLayer(new CustomPlayerElytraLayer<>(this));
     }
 
     @Override
-    public void doRender(@Nonnull EntityPlayer entity, double x, double y, double z, float entityYaw, float partialTicks) {
+    public void render(@Nonnull EntityPlayer entity, double x, double y, double z, float entityYaw, float partialTicks) {
         if (this.animatable != null) {
             CapabilityEvent.getModelInfoCap(entity).ifPresent(cap -> {
                 this.animatable.setPlayer(entity);
@@ -44,7 +42,7 @@ public class CustomPlayerRenderer extends GeoReplacedEntityRenderer<EntityPlayer
         GeoModel geoModel = GeckoLibCache.getInstance().getGeoModels().get(location);
         if (geoModel != null) {
             this.geoModel = geoModel;
-            super.doRender(entity, x, y, z, entityYaw, partialTicks);
+            super.render(entity, x, y, z, entityYaw, partialTicks);
         }
     }
 

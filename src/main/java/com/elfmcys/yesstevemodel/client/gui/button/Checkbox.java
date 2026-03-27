@@ -1,6 +1,7 @@
 package com.elfmcys.yesstevemodel.client.gui.button;
 
 import com.elfmcys.yesstevemodel.YesSteveModel;
+import com.elfmcys.yesstevemodel.util.RenderUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.util.ResourceLocation;
@@ -24,12 +25,12 @@ public class Checkbox extends Button {
     }
 
     @Override
-    protected void renderWidget(@Nonnull Minecraft mc, int mouseX, int mouseY, float pPartialTick) {
-        int j = this.x + BOX_SIZE + 4;
-        int k = this.y + (this.height >> 1) - 4;
+    protected void renderWidget(@Nonnull Minecraft mc, int mouseX, int mouseY) {
+        int j = this.xPosition + BOX_SIZE + 4;
+        int k = this.yPosition + (this.height >> 1) - 4;
         mc.getTextureManager().bindTexture(CHECKBOX);
-        drawScaledCustomSizeModalRect(
-                this.x, this.y,
+        RenderUtil.drawScaledCustomSizeModalRect(
+                this.xPosition, this.yPosition,
                 this.isMouseOver() ? 20 : 0, this.selected() ? 20 : 0,
                 20, 20,
                 BOX_SIZE, BOX_SIZE,

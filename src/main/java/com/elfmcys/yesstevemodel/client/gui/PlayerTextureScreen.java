@@ -6,14 +6,14 @@ import com.elfmcys.yesstevemodel.client.gui.button.FlatIconButton;
 import com.elfmcys.yesstevemodel.client.gui.button.TextureButton;
 import com.elfmcys.yesstevemodel.event.CapabilityEvent;
 import com.elfmcys.yesstevemodel.util.RenderUtil;
+import com.elfmcys.yesstevemodel.util.ResourceUtil;
 import com.google.common.collect.Lists;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.SoundEvents;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public class PlayerTextureScreen extends Screen {
         this.parent = parent;
         this.modelId = modelId;
         this.textures = textures;
-        this.textures.sort(ResourceLocation::compareTo);
+        this.textures.sort(ResourceUtil.COMPARATOR);
         this.animations = new ArrayList<>(ClientModelManager.DEFAULT_ANIMATION_FILE.animations().keySet());
         this.animations.sort(String::compareTo);
         this.player = parent.player;
@@ -122,8 +122,8 @@ public class PlayerTextureScreen extends Screen {
             String key = String.format("gui.yes_steve_model.texture.button.%s", name.replaceAll("\\:", "."));
             String keyDesc = String.format("gui.yes_steve_model.texture.button.%s.desc", name.replaceAll("\\:", "."));
             FlatColorButton sideButton = new FlatColorButton(this.x + 5, yStart, 80, 16, I18n.format(key), b -> this.animation = name);
-            sideButton.setTooltips(Lists.newArrayList(TextFormatting.GOLD + I18n.format(keyDesc),
-                    TextFormatting.GRAY + I18n.format("gui.yes_steve_model.texture.button.animation_name", name)));
+            sideButton.setTooltips(Lists.newArrayList(EnumChatFormatting.GOLD + I18n.format(keyDesc),
+                    EnumChatFormatting.GRAY + I18n.format("gui.yes_steve_model.texture.button.animation_name", name)));
             this.addButton(sideButton);
         }
 
@@ -159,10 +159,10 @@ public class PlayerTextureScreen extends Screen {
         });
 
         String texturePageInfo = String.format("%d/%d", this.texturePage + 1, this.maxTexturePage + 1);
-        this.drawString(this.fontRenderer, texturePageInfo, this.x + 302 + (118 - this.fontRenderer.getStringWidth(texturePageInfo)) / 2, this.y + 223 - this.fontRenderer.FONT_HEIGHT / 2, 0xF3EFE0);
+        this.drawString(this.fontRendererObj, texturePageInfo, this.x + 302 + (118 - this.fontRendererObj.getStringWidth(texturePageInfo)) / 2, this.y + 223 - this.fontRendererObj.FONT_HEIGHT / 2, 0xF3EFE0);
 
         String animationPageInfo = String.format("%d/%d", this.animationPage + 1, this.maxAnimationPage + 1);
-        this.drawString(this.fontRenderer, animationPageInfo, this.x + 5 + (80 - this.fontRenderer.getStringWidth(animationPageInfo)) / 2, this.y + 218, 0xF3EFE0);
+        this.drawString(this.fontRendererObj, animationPageInfo, this.x + 5 + (80 - this.fontRendererObj.getStringWidth(animationPageInfo)) / 2, this.y + 218, 0xF3EFE0);
 
         super.drawScreen(mouseX, mouseY, partialTick);
         this.buttonList.stream().filter(r -> r instanceof FlatColorButton)
@@ -209,12 +209,12 @@ public class PlayerTextureScreen extends Screen {
     private void scrollTexturePage(double delta) {
         if (delta > 0 && this.texturePage > 0) {
             this.texturePage--;
-            this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            this.mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
             this.refreshGui();
         }
         if (delta < 0 && this.texturePage < this.maxTexturePage) {
             this.texturePage++;
-            this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            this.mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
             this.refreshGui();
         }
     }
@@ -222,12 +222,12 @@ public class PlayerTextureScreen extends Screen {
     private void scrollAnimationPage(double delta) {
         if (delta > 0 && this.animationPage > 0) {
             this.animationPage--;
-            this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            this.mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
             this.refreshGui();
         }
         if (delta < 0 && this.animationPage < this.maxAnimationPage) {
             this.animationPage++;
-            this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            this.mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
             this.refreshGui();
         }
     }
@@ -262,7 +262,7 @@ public class PlayerTextureScreen extends Screen {
 
     private void changeScaleValue(float amount) {
         float tmp = this.scale + amount * this.scale;
-        this.scale = MathHelper.clamp(tmp, SCALE_MIN, SCALE_MAX);
+        this.scale = MathHelper.clamp_float(tmp, SCALE_MIN, SCALE_MAX);
     }
 
     @Override

@@ -3,15 +3,14 @@ package com.elfmcys.yesstevemodel.network.message;
 import com.elfmcys.yesstevemodel.data.EncryptTools;
 import com.elfmcys.yesstevemodel.model.format.ServerModelInfo;
 import com.elfmcys.yesstevemodel.network.NetworkHandler;
+import com.elfmcys.yesstevemodel.network.message.util.ExtendedBuffer;
 import com.elfmcys.yesstevemodel.util.ThreadTools;
 import com.elfmcys.yesstevemodel.util.UuidUtils;
 import com.google.common.collect.Lists;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import org.apache.commons.io.FileUtils;
 
 import javax.annotation.Nullable;
@@ -23,9 +22,10 @@ import java.util.stream.Collectors;
 
 import static com.elfmcys.yesstevemodel.model.ServerModelManager.*;
 
-public class SyncModelFiles implements IPacketBufferMessage {
+public class SyncModelFiles implements IExtendedBufferMessage {
     private String[] md5Info;
 
+    @SuppressWarnings("unused")
     public SyncModelFiles() {
     }
 
@@ -34,19 +34,19 @@ public class SyncModelFiles implements IPacketBufferMessage {
     }
 
     @Override
-    public void toBytes(PacketBuffer buf) {
-        buf.writeVarInt(this.md5Info.length);
+    public void toBytes(ExtendedBuffer buf) {
+        buf.writeVarIntToBuffer(this.md5Info.length);
         for (String md5 : this.md5Info) {
-            buf.writeString(md5);
+            buf.writeStringToBuffer(md5);
         }
     }
 
     @Override
-    public void fromBytes(PacketBuffer buf) {
-        int count = buf.readVarInt();
+    public void fromBytes(ExtendedBuffer buf) {
+        int count = buf.readVarIntFromBuffer();
         String[] output = new String[count];
         for (int i = 0; i < count; i++) {
-            output[i] = buf.readString(Short.MAX_VALUE);
+            output[i] = buf.readStringFromBuffer();
         }
         this.md5Info = output;
     }
@@ -56,14 +56,11 @@ public class SyncModelFiles implements IPacketBufferMessage {
         @Override
         public IMessage onMessage(SyncModelFiles message, MessageContext ctx) {
             if (ctx.side.isServer()) {
-                FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> {
-                    EntityPlayerMP sender = ctx.getServerHandler().player;
-                    if (sender == null) {
-                        return;
-                    }
+                EntityPlayerMP sender = ctx.getServerHandler().playerEntity;
+                if (sender != null) {
                     sendPassword(sender);
                     sendModelFiles(message.md5Info, sender);
-                });
+                }
             }
             return null;
         }

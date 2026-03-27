@@ -2,7 +2,6 @@ package com.elfmcys.yesstevemodel.command;
 
 import com.elfmcys.yesstevemodel.command.sub.*;
 import net.minecraft.command.ICommandSender;
-import net.minecraftforge.server.command.CommandTreeBase;
 
 import javax.annotation.Nonnull;
 
@@ -22,13 +21,13 @@ public class RootCommand extends CommandTreeBase {
 
     @Nonnull
     @Override
-    public String getName() {
+    public String getCommandName() {
         return ROOT_NAME;
     }
 
     @Nonnull
     @Override
-    public String getUsage(@Nonnull ICommandSender sender) {
+    public String getCommandUsage(@Nonnull ICommandSender sender) {
         return "commands.yes_steve_model.ysm.usage";
     }
 

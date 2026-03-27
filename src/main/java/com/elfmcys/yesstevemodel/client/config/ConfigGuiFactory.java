@@ -1,13 +1,14 @@
 package com.elfmcys.yesstevemodel.client.config;
 
-import com.elfmcys.yesstevemodel.Tags;
 import com.elfmcys.yesstevemodel.YesSteveModel;
 import com.elfmcys.yesstevemodel.config.Config;
+import cpw.mods.fml.client.IModGuiFactory;
+import cpw.mods.fml.client.config.GuiConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraftforge.fml.client.IModGuiFactory;
-import net.minecraftforge.fml.client.config.GuiConfig;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Set;
 
@@ -17,19 +18,22 @@ public class ConfigGuiFactory implements IModGuiFactory {
     public void initialize(Minecraft minecraftInstance) {
     }
 
+    @Nonnull
     @Override
-    public boolean hasConfigGui() {
-        return true;
+    public Class<? extends GuiScreen> mainConfigGuiClass() {
+        return ConfigGui.class;
     }
 
-    @Override
-    public GuiScreen createConfigGui(final GuiScreen parentScreen) {
-        return new ConfigGui(parentScreen);
-    }
-
+    @Nonnull
     @Override
     public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() {
         return Collections.emptySet();
+    }
+
+    @Nullable
+    @Override
+    public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) {
+        return null;
     }
 
     /**
@@ -37,7 +41,7 @@ public class ConfigGuiFactory implements IModGuiFactory {
      */
     public static class ConfigGui extends GuiConfig {
         public ConfigGui(final GuiScreen parent) {
-            super(parent, Config.getRootConfigElements(), YesSteveModel.MOD_ID, false, false, Tags.MOD_NAME);
+            super(parent, Config.getRootConfigElements(), YesSteveModel.MOD_ID, false, false, YesSteveModel.MOD_NAME);
         }
     }
 }

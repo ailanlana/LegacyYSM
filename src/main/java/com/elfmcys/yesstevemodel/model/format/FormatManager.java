@@ -21,7 +21,7 @@ public final class FormatManager {
         ANIMATION_NAMES.add("arm");
         ANIMATION_NAMES.add("extra");
         ANIMATION_NAMES.add("tac");
-        ANIMATION_NAMES.add("carryon");
+//        ANIMATION_NAMES.add("carryon");
         ANIMATION_NAMES.add("arrow");
     }
 

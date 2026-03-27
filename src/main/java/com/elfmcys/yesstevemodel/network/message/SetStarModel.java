@@ -1,20 +1,20 @@
 package com.elfmcys.yesstevemodel.network.message;
 
 import com.elfmcys.yesstevemodel.event.CapabilityEvent;
+import com.elfmcys.yesstevemodel.network.message.util.ExtendedBuffer;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import javax.annotation.Nullable;
 
-public class SetStarModel implements IPacketBufferMessage {
+public class SetStarModel implements IExtendedBufferMessage {
     private ResourceLocation modelId;
     private boolean isAdd;
 
+    @SuppressWarnings("unused")
     public SetStarModel() {
     }
 
@@ -32,14 +32,14 @@ public class SetStarModel implements IPacketBufferMessage {
     }
 
     @Override
-    public void toBytes(PacketBuffer buf) {
-        buf.writeResourceLocation(this.modelId);
+    public void toBytes(ExtendedBuffer buf) {
+        buf.writeResourceLocationToBuffer(this.modelId);
         buf.writeBoolean(this.isAdd);
     }
 
     @Override
-    public void fromBytes(PacketBuffer buf) {
-        this.modelId = buf.readResourceLocation();
+    public void fromBytes(ExtendedBuffer buf) {
+        this.modelId = buf.readResourceLocationFromBuffer();
         this.isAdd = buf.readBoolean();
     }
 
@@ -48,13 +48,8 @@ public class SetStarModel implements IPacketBufferMessage {
         @Override
         public IMessage onMessage(SetStarModel message, MessageContext ctx) {
             if (ctx.side.isServer()) {
-                FMLCommonHandler.instance().getWorldThread(ctx.netHandler).addScheduledTask(() -> {
-                    EntityPlayerMP sender = ctx.getServerHandler().player;
-                    if (sender == null) {
-                        return;
-                    }
-                    handleCapability(message, sender);
-                });
+                EntityPlayerMP sender = ctx.getServerHandler().playerEntity;
+                if (sender != null) handleCapability(message, sender);
             }
             return null;
         }

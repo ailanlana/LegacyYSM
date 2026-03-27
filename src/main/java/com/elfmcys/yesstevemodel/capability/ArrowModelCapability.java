@@ -1,13 +1,15 @@
 package com.elfmcys.yesstevemodel.capability;
 
-import net.minecraft.nbt.NBTBase;
+import com.elfmcys.yesstevemodel.YesSteveModel;
+import net.minecraft.entity.Entity;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.EnumFacing;
-import net.minecraftforge.common.capabilities.Capability;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
+import net.minecraftforge.common.IExtendedEntityProperties;
 
-import javax.annotation.Nullable;
-
-public class ArrowModelCapability {
+public class ArrowModelCapability implements IExtendedEntityProperties {
+    public static final String IDENTIFIER = new ResourceLocation(YesSteveModel.MOD_ID, "arrow_model").toString();
     private String modelId = "";
 
     public String getModelId() {
@@ -27,19 +29,22 @@ public class ArrowModelCapability {
     }
 
     public void deserializeNBT(NBTTagString nbt) {
-        this.modelId = nbt.getString();
+        this.modelId = nbt.func_150285_a_();
     }
 
-    public static class Storage implements Capability.IStorage<ArrowModelCapability> {
-        @Nullable
-        @Override
-        public NBTBase writeNBT(Capability<ArrowModelCapability> capability, ArrowModelCapability instance, EnumFacing side) {
-            return instance.serializeNBT();
-        }
+    @Override
+    public void saveNBTData(NBTTagCompound compound) {
+        compound.setTag(IDENTIFIER, this.serializeNBT());
+    }
 
-        @Override
-        public void readNBT(Capability<ArrowModelCapability> capability, ArrowModelCapability instance, EnumFacing side, NBTBase nbt) {
-            instance.deserializeNBT((NBTTagString) nbt);
+    @Override
+    public void loadNBTData(NBTTagCompound compound) {
+        if (compound.hasKey(IDENTIFIER)) {
+            this.deserializeNBT((NBTTagString) compound.getTag(IDENTIFIER));
         }
+    }
+
+    @Override
+    public void init(Entity entity, World world) {
     }
 }

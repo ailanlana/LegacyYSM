@@ -1,7 +1,7 @@
 package com.elfmcys.yesstevemodel.client.animation.condition;
 
+import com.elfmcys.yesstevemodel.client.compat.Hand;
 import com.google.common.collect.Maps;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.Map;
@@ -16,12 +16,12 @@ public class ConditionManager {
     public static Map<ResourceLocation, ConditionArmor> ARMOR = Maps.newHashMap();
 
     public static void addTest(ResourceLocation id, String name) {
-        SWING.computeIfAbsent(id, k -> new ConditionalSwing(EnumHand.MAIN_HAND)).addTest(name);
-        SWING_OFFHAND.computeIfAbsent(id, k -> new ConditionalSwing(EnumHand.OFF_HAND)).addTest(name);
-        USE_MAINHAND.computeIfAbsent(id, k -> new ConditionalUse(EnumHand.MAIN_HAND)).addTest(name);
-        USE_OFFHAND.computeIfAbsent(id, k -> new ConditionalUse(EnumHand.OFF_HAND)).addTest(name);
-        HOLD_MAINHAND.computeIfAbsent(id, k -> new ConditionalHold(EnumHand.MAIN_HAND)).addTest(name);
-        HOLD_OFFHAND.computeIfAbsent(id, k -> new ConditionalHold(EnumHand.OFF_HAND)).addTest(name);
+        SWING.computeIfAbsent(id, k -> new ConditionalSwing(Hand.MAIN_HAND)).addTest(name);
+        SWING_OFFHAND.computeIfAbsent(id, k -> new ConditionalSwing(Hand.OFF_HAND)).addTest(name);
+        USE_MAINHAND.computeIfAbsent(id, k -> new ConditionalUse(Hand.MAIN_HAND)).addTest(name);
+        USE_OFFHAND.computeIfAbsent(id, k -> new ConditionalUse(Hand.OFF_HAND)).addTest(name);
+        HOLD_MAINHAND.computeIfAbsent(id, k -> new ConditionalHold(Hand.MAIN_HAND)).addTest(name);
+        HOLD_OFFHAND.computeIfAbsent(id, k -> new ConditionalHold(Hand.OFF_HAND)).addTest(name);
         ARMOR.computeIfAbsent(id, k -> new ConditionArmor()).addTest(name);
     }
 

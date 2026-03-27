@@ -47,7 +47,7 @@ public class JsonKeyFrameUtils {
             Map.Entry<String, JsonElement> previousKeyFrame = i == 0 ? null : element.get(i - 1);
 
             double previousKeyFrameLocation = previousKeyFrame == null ? 0 : Double.parseDouble(previousKeyFrame.getKey());
-            double currentKeyFrameLocation = NumberUtils.isCreatable(keyframe.getKey()) ? Double.parseDouble(keyframe.getKey()) : 0;
+            double currentKeyFrameLocation = NumberUtils.isNumber(keyframe.getKey()) ? Double.parseDouble(keyframe.getKey()) : 0;
             double animationTimeDifference = currentKeyFrameLocation - previousKeyFrameLocation;
 
             JsonArray vectorJsonArray = getKeyFrameVector(keyframe.getValue());

@@ -1,22 +1,18 @@
 package com.elfmcys.yesstevemodel.client.event;
 
-import com.elfmcys.yesstevemodel.YesSteveModel;
 import com.elfmcys.yesstevemodel.event.CapabilityEvent;
 import com.elfmcys.yesstevemodel.network.NetworkHandler;
 import com.elfmcys.yesstevemodel.network.message.SetPlayAnimation;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.InputEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.settings.GameSettings;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
-import net.minecraftforge.fml.relauncher.Side;
 
-@Mod.EventBusSubscriber(value = Side.CLIENT, modid = YesSteveModel.MOD_ID)
 public class PlayerMoveEvent {
     @SubscribeEvent
-    public static void onKeyboardInput(InputEvent.KeyInputEvent event) {
-        EntityPlayerSP player = Minecraft.getMinecraft().player;
+    public void onKeyboardInput(InputEvent.KeyInputEvent event) {
+        EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
         if (isMoveKey() && player != null) {
             CapabilityEvent.getModelInfoCap(player).ifPresent(cap -> {
                 if (cap.isPlayAnimation()) {

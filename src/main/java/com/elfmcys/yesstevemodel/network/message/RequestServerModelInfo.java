@@ -2,23 +2,24 @@ package com.elfmcys.yesstevemodel.network.message;
 
 import com.elfmcys.yesstevemodel.client.gui.ModelManageScreen;
 import com.elfmcys.yesstevemodel.model.format.Type;
+import com.elfmcys.yesstevemodel.network.message.util.ExtendedBuffer;
 import com.google.common.collect.Lists;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class RequestServerModelInfo implements IPacketBufferMessage {
+public class RequestServerModelInfo implements IExtendedBufferMessage {
     private List<Info> builtinModels;
     private List<Info> customModels;
     private List<Info> authModels;
 
+    @SuppressWarnings("unused")
     public RequestServerModelInfo() {
     }
 
@@ -29,35 +30,35 @@ public class RequestServerModelInfo implements IPacketBufferMessage {
     }
 
     @Override
-    public void toBytes(PacketBuffer buf) {
-        buf.writeVarInt(this.builtinModels.size());
+    public void toBytes(ExtendedBuffer buf) {
+        buf.writeVarIntToBuffer(this.builtinModels.size());
         for (Info info : this.builtinModels) {
             infoToBuffer(buf, info);
         }
-        buf.writeVarInt(this.customModels.size());
+        buf.writeVarIntToBuffer(this.customModels.size());
         for (Info info : this.customModels) {
             infoToBuffer(buf, info);
         }
-        buf.writeVarInt(this.authModels.size());
+        buf.writeVarIntToBuffer(this.authModels.size());
         for (Info info : this.authModels) {
             infoToBuffer(buf, info);
         }
     }
 
     @Override
-    public void fromBytes(PacketBuffer buf) {
+    public void fromBytes(ExtendedBuffer buf) {
         this.builtinModels = Lists.newArrayList();
-        int builtinSize = buf.readVarInt();
+        int builtinSize = buf.readVarIntFromBuffer();
         for (int i = 0; i < builtinSize; i++) {
             this.builtinModels.add(bufferToInfo(buf));
         }
         this.customModels = Lists.newArrayList();
-        int customSize = buf.readVarInt();
+        int customSize = buf.readVarIntFromBuffer();
         for (int i = 0; i < customSize; i++) {
             this.customModels.add(bufferToInfo(buf));
         }
         this.authModels = Lists.newArrayList();
-        int authSize = buf.readVarInt();
+        int authSize = buf.readVarIntFromBuffer();
         for (int i = 0; i < authSize; i++) {
             this.authModels.add(bufferToInfo(buf));
         }
@@ -75,18 +76,18 @@ public class RequestServerModelInfo implements IPacketBufferMessage {
 
         @SideOnly(Side.CLIENT)
         private static void handleClient(RequestServerModelInfo message) {
-            Minecraft.getMinecraft().addScheduledTask(() -> Minecraft.getMinecraft().displayGuiScreen(new ModelManageScreen(message.customModels, message.authModels)));
+            Minecraft.getMinecraft().displayGuiScreen(new ModelManageScreen(message.customModels, message.authModels));
         }
     }
 
-    private static void infoToBuffer(PacketBuffer buf, Info info) {
-        buf.writeString(info.fileName);
-        buf.writeEnumValue(info.type);
+    private static void infoToBuffer(ExtendedBuffer buf, Info info) {
+        buf.writeStringToBuffer(info.fileName);
+        buf.writeEnumValueToBuffer(info.type);
         buf.writeLong(info.size);
     }
 
-    private static Info bufferToInfo(PacketBuffer buf) {
-        return new Info(buf.readString(Short.MAX_VALUE), buf.readEnumValue(Type.class), buf.readLong());
+    private static Info bufferToInfo(ExtendedBuffer buf) {
+        return new Info(buf.readStringFromBuffer(), buf.readEnumValueFromBuffer(Type.class), buf.readLong());
     }
 
     public static class Info {
