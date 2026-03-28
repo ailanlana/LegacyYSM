@@ -1,19 +1,20 @@
 package com.elfmcys.yesstevemodel.client.compat;
 
 import cpw.mods.fml.common.Optional;
-import net.minecraft.client.model.ModelBiped;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraftforge.client.IItemRenderer;
 import xonin.backhand.api.core.BackhandUtils;
 import xonin.backhand.api.core.EnumHand;
 import xonin.backhand.api.core.IBackhandPlayer;
-import xonin.backhand.client.utils.BackhandRenderHelper;
+import xonin.backhand.compat.IOffhandRenderOptOut;
 
 import javax.annotation.Nullable;
 
 public enum Hand {
+    // Backhand 没有反转主副手功能，这里也就直接硬写左右了
+    // 实际上，最新版 YSM 也不支持反转
     /// 右手
     MAIN_HAND {
         @Override
@@ -102,26 +103,13 @@ public enum Hand {
         return OFF_HAND.isSwinging(player) ? OFF_HAND : (MAIN_HAND.isSwinging(player) ? MAIN_HAND : null);
     }
 
-    private static final ModelBiped DUMMY_BIPED = new ModelBiped();
-
-    static {
-        DUMMY_BIPED.bipedLeftArm.rotationPointX = 0.0F;
-        DUMMY_BIPED.bipedLeftArm.rotationPointY = 0.0F;
-        DUMMY_BIPED.bipedLeftArm.rotationPointZ = 0.0F;
-        DUMMY_BIPED.bipedLeftArm.rotateAngleX = 0.0F;
-        DUMMY_BIPED.bipedLeftArm.rotateAngleY = 0.0F;
-        DUMMY_BIPED.bipedLeftArm.rotateAngleZ = 0.0F;
+    public static boolean isSpecialOffhandRenderer(IItemRenderer customRenderer) {
+        return Mods.BACKHAND_INSTALLED && isIOffhandRenderOptOut(customRenderer);
     }
 
-    public static void renderOffhandItemIn3rdPerson(EntityLivingBase living) {
-        if (Mods.BACKHAND_INSTALLED && living instanceof EntityPlayer player) renderBackhandItem(player);
-    }
-
+    @SuppressWarnings("UnstableApiUsage")
     @Optional.Method(modid = Mods.BACKHAND)
-    private static void renderBackhandItem(EntityPlayer player) {
-        GL11.glPushMatrix();
-        GL11.glTranslatef(0.0625F, -0.4375F, -0.0625F);
-        BackhandRenderHelper.renderOffhandItemIn3rdPerson(player, DUMMY_BIPED, 0F);
-        GL11.glPopMatrix();
+    private static boolean isIOffhandRenderOptOut(IItemRenderer customRenderer) {
+        return customRenderer instanceof IOffhandRenderOptOut;
     }
 }

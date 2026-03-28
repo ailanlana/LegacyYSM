@@ -34,7 +34,8 @@ public class ModelInfoButton extends Button {
         final String text = switch (this.info.getType()) {
             case FOLDER -> EnumChatFormatting.AQUA + I18n.format("gui.yes_steve_model.model_manage.type.folder");
             case ZIP -> EnumChatFormatting.GOLD + I18n.format("gui.yes_steve_model.model_manage.type.zip");
-            case SEVEN_Z -> EnumChatFormatting.LIGHT_PURPLE + I18n.format("gui.yes_steve_model.model_manage.type.seven_z");
+            case SEVEN_Z ->
+                    EnumChatFormatting.LIGHT_PURPLE + I18n.format("gui.yes_steve_model.model_manage.type.seven_z");
             case YSM -> EnumChatFormatting.YELLOW + I18n.format("gui.yes_steve_model.model_manage.type.ysm");
             case UNKNOWN -> EnumChatFormatting.DARK_GRAY + I18n.format("gui.yes_steve_model.model_manage.type.unknown");
         };

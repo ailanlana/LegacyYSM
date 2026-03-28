@@ -4,7 +4,6 @@ import com.elfmcys.yesstevemodel.client.ClientProxy;
 import com.elfmcys.yesstevemodel.client.compat.EntityEquipmentSlot;
 import com.elfmcys.yesstevemodel.client.compat.Hand;
 import com.elfmcys.yesstevemodel.client.entity.CustomPlayerEntity;
-import com.elfmcys.yesstevemodel.client.gui.button.Button;
 import com.elfmcys.yesstevemodel.client.renderer.CustomPlayerRenderer;
 import com.elfmcys.yesstevemodel.geckolib3.core.IAnimatable;
 import com.elfmcys.yesstevemodel.geckolib3.geo.GeoReplacedEntityRenderer;
@@ -324,7 +323,7 @@ public final class RenderUtil {
     }
 
     /**
-     * {@link Button#renderWidget(Minecraft, int, int)}
+     * {@link com.elfmcys.yesstevemodel.client.gui.button.TextureButton#renderWidget(Minecraft, int, int)}
      */
     @SuppressWarnings("JavadocReference")
     public static void renderTextureButtonEntity(int pPosX, int pPosY, int pScale, EntityPlayer player, ResourceLocation modelId, ResourceLocation textureId) {

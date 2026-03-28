@@ -282,7 +282,7 @@ public final class AnimationManager {
             return PlayState.STOP;
         }
         ItemStack itemBySlot = slot.getItemStackFromSlot(player);
-        if (itemBySlot != null) {
+        if (itemBySlot == null) {
             return PlayState.STOP;
         }
 
@@ -304,12 +304,7 @@ public final class AnimationManager {
     }
 
     private static boolean checkSwingAndUse(EntityPlayer player, Hand hand) {
-        Hand swingingHand = Hand.getSwingingHand(player);
-        if (swingingHand != null && swingingHand == hand) {
-            return false;
-        }
-        Hand usingHand = Hand.getUsingHand(player);
-        return usingHand == null || usingHand != hand;
+        return !hand.isSwinging(player) && !hand.isUsing(player);
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

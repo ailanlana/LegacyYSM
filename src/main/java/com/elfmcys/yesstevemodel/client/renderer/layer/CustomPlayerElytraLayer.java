@@ -20,7 +20,7 @@
 //
 //import javax.annotation.Nonnull;
 //
-///**
+/// **
 // * 可参考原版实现 {@link net.minecraft.client.renderer.entity.layers.LayerElytra}。
 // */
 //public class CustomPlayerElytraLayer<T extends EntityLivingBase, R extends IGeoRenderer<T>> extends GeoLayerRenderer<T, R> {
