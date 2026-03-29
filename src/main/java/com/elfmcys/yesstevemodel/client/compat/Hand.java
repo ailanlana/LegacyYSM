@@ -42,6 +42,7 @@ public enum Hand {
             return player.isSwingInProgress;
         }
     },
+    // FIXME：非常多问题，非常坏
     /// 左手
     OFF_HAND {
         @Override
@@ -66,7 +67,7 @@ public enum Hand {
 
         @Override
         public boolean isUsing(EntityPlayer player) {
-            return isUsingOffhand(player);
+            return Mods.BACKHAND_INSTALLED && isUsingOffhand(player);
         }
 
         @Optional.Method(modid = Mods.BACKHAND)
@@ -76,7 +77,7 @@ public enum Hand {
 
         @Override
         public boolean isSwinging(EntityPlayer player) {
-            return isSwingingOffhand(player);
+            return Mods.BACKHAND_INSTALLED && isSwingingOffhand(player);
         }
 
         @Optional.Method(modid = Mods.BACKHAND)

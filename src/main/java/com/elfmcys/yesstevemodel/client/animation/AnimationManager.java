@@ -131,6 +131,7 @@ public final class AnimationManager {
         return PlayState.STOP;
     }
 
+    // FIXME
     @Nonnull
     public PlayState predicateOffhandHold(AnimationEvent<CustomPlayerEntity> event) {
         CustomPlayerEntity animatable = event.getAnimatable();
