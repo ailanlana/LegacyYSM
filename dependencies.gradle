@@ -35,15 +35,24 @@
  */
 dependencies {
     shadowImplementation("it.unimi.dsi:fastutil:8.5.18")
+
+    // 副手
     implementation("com.github.GTNewHorizons:Backhand:1.8.4:dev")
+
+    // 游泳
     implementation("libs:aquaacrobatics:0.1.0:dev")
-    compileOnly("libs:etfuturum:2.6.13-GTNH-pre:dev")
+
+    // 鞘翅
+    compileOnly("libs:etfuturum:2.6.12-GTNH:dev")
+    api("com.github.GTNewHorizons:Baubles-Expanded:2.2.11-GTNH:dev")
     implementation(rfg.deobf("curse.maven:backlytra-244337:2296363"))
+
+    // 按键
     implementation(rfg.deobf("curse.maven:modern-keybinding-686846:4034362"))
     // 与 MKB 冲突
     compileOnly("com.github.GTNewHorizons:Controlling:2.1.7:dev")
-    api("com.github.GTNewHorizons:GTNHLib:0.9.45:dev")
-    api("com.github.GTNewHorizons:Baubles-Expanded:2.2.12-GTNH-pre:dev")
 
+    // 通用依赖，不然会下很多个 GTNH Lib
+    api("com.github.GTNewHorizons:GTNHLib:0.9.45:dev")
     runtimeOnlyNonPublishable("com.github.GTNewHorizons:NotEnoughItems:2.8.79-GTNH:dev")
 }
