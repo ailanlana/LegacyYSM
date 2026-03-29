@@ -22,6 +22,6 @@ public class ReplacePlayerRenderEvent {
         }
         event.setCanceled(true);
         RenderPlayerEventPreAccessor accessor = (RenderPlayerEventPreAccessor) event;
-        ClientProxy.getInstance().doRender(playerRender, accessor.ysm$getX(), accessor.ysm$getY(), accessor.ysm$getZ(), playerRender.rotationYaw, event.partialRenderTick);
+        ClientProxy.getInstance().render(playerRender, accessor.ysm$getX(), accessor.ysm$getY(), accessor.ysm$getZ(), playerRender.rotationYaw, event.partialRenderTick);
     }
 }

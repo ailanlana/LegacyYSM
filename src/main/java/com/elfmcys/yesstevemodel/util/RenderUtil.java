@@ -14,7 +14,6 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.Entity;
@@ -121,10 +120,10 @@ public final class RenderUtil {
                     GL11.glTranslated(0, -0.5, 0);
                 }
                 if (entity.hasPreviewAnimation("ride")) {
-                    GL11.glTranslated(0, 0.85, 0);
+                    GL11.glTranslated(0, 0.70, 0);
                 }
                 if (entity.hasPreviewAnimation("ride_pig")) {
-                    GL11.glTranslated(0, 0.3125, 0);
+                    GL11.glTranslated(0, 0.1625, 0);
                 }
                 if (entity.hasPreviewAnimation("boat")) {
                     GL11.glTranslated(0, -0.45, 0);
@@ -132,7 +131,6 @@ public final class RenderUtil {
                 GL11.glPushMatrix();
                 GL11.glTranslatef(0.0F, player.yOffset, 0.0F);
                 renderer.render(player, entity, 0, 0, 0, 0.0F, 1.0F);
-                GL11.glPopMatrix();
                 // 清理实体渲染
                 GL11.glEnable(GL12.GL_RESCALE_NORMAL);
                 GL11.glEnable(GL11.GL_COLOR_MATERIAL);
@@ -143,6 +141,7 @@ public final class RenderUtil {
                 } catch (ExecutionException e) {
                     throw new RuntimeException(e);
                 }
+                GL11.glPopMatrix();
                 GL11.glPopMatrix();
                 /*
                 动画位移矩阵结束
@@ -194,49 +193,17 @@ public final class RenderUtil {
 
         GL11.glRotatef(yaw + 180, 0, 1, 0);
         GL11.glTranslated(-0.5, 0, 0.5);
-        // TODO：以下是 AI 写的，可用性未知
+
         Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
-
-        Tessellator tessellator = Tessellator.instance;
         RenderBlocks renderBlocks = RenderBlocks.getInstance();
-
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
         GL11.glPushMatrix();
         GL11.glTranslatef(0, 0, 1);
-        renderBlocks.setRenderBounds(0.0D, 0.0D, 0.0D, 1.0D, 0.5625D, 1.0D);
-        tessellator.startDrawingQuads();
-        tessellator.setNormal(0.0F, -1.0F, 0.0F);
-        renderBlocks.renderFaceYNeg(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(0, 8));
-        tessellator.setNormal(0.0F, 1.0F, 0.0F);
-        renderBlocks.renderFaceYPos(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(1, 8));
-        tessellator.setNormal(0.0F, 0.0F, -1.0F);
-        renderBlocks.renderFaceZNeg(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(2, 8));
-        tessellator.setNormal(0.0F, 0.0F, 1.0F);
-        renderBlocks.renderFaceZPos(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(3, 8));
-        tessellator.setNormal(-1.0F, 0.0F, 0.0F);
-        renderBlocks.renderFaceXNeg(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(4, 8));
-        tessellator.setNormal(1.0F, 0.0F, 0.0F);
-        renderBlocks.renderFaceXPos(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(5, 8));
-        tessellator.draw();
+        renderBlocks.renderBlockAsItem(Blocks.bed, 0, 1.0F);
         GL11.glPopMatrix();
 
         GL11.glPushMatrix();
-        renderBlocks.setRenderBounds(0.0D, 0.0D, 0.0D, 1.0D, 0.5625D, 1.0D);
-        tessellator.startDrawingQuads();
-        tessellator.setNormal(0.0F, -1.0F, 0.0F);
-        renderBlocks.renderFaceYNeg(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(0, 0));
-        tessellator.setNormal(0.0F, 1.0F, 0.0F);
-        renderBlocks.renderFaceYPos(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(1, 0));
-        tessellator.setNormal(0.0F, 0.0F, -1.0F);
-        renderBlocks.renderFaceZNeg(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(2, 0));
-        tessellator.setNormal(0.0F, 0.0F, 1.0F);
-        renderBlocks.renderFaceZPos(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(3, 0));
-        tessellator.setNormal(-1.0F, 0.0F, 0.0F);
-        renderBlocks.renderFaceXNeg(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(4, 0));
-        tessellator.setNormal(1.0F, 0.0F, 0.0F);
-        renderBlocks.renderFaceXPos(Blocks.bed, 0.0D, 0.0D, 0.0D, Blocks.bed.getIcon(5, 0));
-        tessellator.draw();
+        renderBlocks.renderBlockAsItem(Blocks.bed, 8, 1.0F);
         GL11.glPopMatrix();
 
         GL11.glPopMatrix();
@@ -251,7 +218,7 @@ public final class RenderUtil {
         GL11.glRotatef(-10 + pitch, 1, 0, 0);
 
         GL11.glRotatef(yaw, 0, 1, 0);
-        GL11.glTranslated(-1.5, -1, -1.5);
+        GL11.glTranslated(-1, -0.5, -2);
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 GL11.glTranslatef(0, 0, 1);
@@ -296,7 +263,6 @@ public final class RenderUtil {
     private static void renderExtraEntity(float yaw, EntityPlayer player, RenderManager dispatcher, Entity entity) {
         GL11.glRotatef(yaw, 0, 1, 0);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GL11.glTranslatef(0.0F, entity.yOffset, 0.0F);
         // Args: entity, x, y, z, yaw, partialTicks
         dispatcher.renderEntityWithPosYaw(entity, 0, -entity.getMountedYOffset() - player.getYOffset(), 0, 0.0F, 1.0F);
         // 清理实体渲染

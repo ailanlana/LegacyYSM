@@ -23,7 +23,7 @@ public class RenderArrowMixin {
             ResourceLocation arrowModelId = ModelIdUtil.getArrowId(new ResourceLocation(extraInfo.getYsmModelId()));
             GeoModel geoModel = GeckoLibCache.getInstance().getGeoModels().get(arrowModelId);
             if (geoModel != null) {
-                ClientProxy.getArrowInstance().doRender(pEntity, x, y, z, pEntityYaw, pPartialTicks);
+                ClientProxy.getArrowInstance().render(pEntity, x, y, z, pEntityYaw, pPartialTicks);
                 callback.cancel();
             }
         }
