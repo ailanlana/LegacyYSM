@@ -268,7 +268,10 @@ public abstract class GeoReplacedEntityRenderer<T extends EntityLivingBase, E ex
             GL11.glRotatef(270.0F, 0, 1, 0);
             return;
         }
+        int deathTime = entity.deathTime;
+        entity.deathTime = 0;
         super.rotateCorpse(entity, ageInTicks, rotationYaw, partialTicks);
+        entity.deathTime = deathTime;
     }
 
     /**
