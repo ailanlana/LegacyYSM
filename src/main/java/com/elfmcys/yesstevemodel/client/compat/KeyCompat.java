@@ -10,7 +10,6 @@ import net.minecraft.client.settings.KeyBinding;
 
 import java.lang.reflect.Method;
 
-// FIXME: 似乎不工作
 public class KeyCompat {
     public static KeyBinding createKeyBinding(
             String description,

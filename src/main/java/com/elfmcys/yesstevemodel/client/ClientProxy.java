@@ -32,27 +32,7 @@ public class ClientProxy extends CommonProxy {
     public void preInit(FMLPreInitializationEvent event) {
         super.preInit(event);
         Mods.init();
-    }
 
-    @Override
-    public void init(FMLInitializationEvent event) {
-        super.init(event);
-        ClientRegistry.registerKeyBinding(PlayerModelScreenKey.PLAYER_MODEL_KEY);
-        ClientRegistry.registerKeyBinding(AnimationRouletteKey.ANIMATION_ROULETTE_KEY);
-        ClientRegistry.registerKeyBinding(DebugAnimationKey.DEBUG_ANIMATION_KEY);
-        ClientRegistry.registerKeyBinding(ExtraPlayerConfigKey.EXTRA_PLAYER_RENDER_KEY);
-        ExtraAnimationKey.registerKeyBinding();
-
-        AnimationRegister.registerAnimationState();
-        AnimationRegister.registerVariables();
-
-        CUSTOM_PLAYER_RENDERER = new CustomPlayerRenderer();
-        CUSTOM_ARROW_RENDERER = new CustomArrowRenderer();
-    }
-
-    @Override
-    protected void registerEvents() {
-        super.registerEvents();
         FMLCommonHandler.instance().bus().register(new ConfigSyncEvent());
         FMLCommonHandler.instance().bus().register(new PlayerMoveEvent());
 
@@ -70,5 +50,21 @@ public class ClientProxy extends CommonProxy {
         MinecraftForge.EVENT_BUS.register(new RenderFirstPlayerBackground());
         MinecraftForge.EVENT_BUS.register(new ReplacePlayerRenderEvent());
         MinecraftForge.EVENT_BUS.register(new VanillaPlayerRenderEvent());
+    }
+
+    @Override
+    public void init(FMLInitializationEvent event) {
+        super.init(event);
+        ClientRegistry.registerKeyBinding(PlayerModelScreenKey.PLAYER_MODEL_KEY);
+        ClientRegistry.registerKeyBinding(AnimationRouletteKey.ANIMATION_ROULETTE_KEY);
+        ClientRegistry.registerKeyBinding(DebugAnimationKey.DEBUG_ANIMATION_KEY);
+        ClientRegistry.registerKeyBinding(ExtraPlayerConfigKey.EXTRA_PLAYER_RENDER_KEY);
+        ExtraAnimationKey.registerKeyBinding();
+
+        AnimationRegister.registerAnimationState();
+        AnimationRegister.registerVariables();
+
+        CUSTOM_PLAYER_RENDERER = new CustomPlayerRenderer();
+        CUSTOM_ARROW_RENDERER = new CustomArrowRenderer();
     }
 }

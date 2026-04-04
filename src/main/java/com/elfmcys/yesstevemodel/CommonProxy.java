@@ -18,7 +18,11 @@ public class CommonProxy {
         Config.init(event.getSuggestedConfigurationFile(), event.getSide());
         ServerModelManager.reloadPacks();
         NetworkHandler.init();
-        this.registerEvents();
+
+        FMLCommonHandler.instance().bus().register(new CapabilityEvent());
+        FMLCommonHandler.instance().bus().register(new EnterServerEvent());
+
+        MinecraftForge.EVENT_BUS.register(new CapabilityEvent());
     }
 
     public void init(FMLInitializationEvent event) {
@@ -29,12 +33,5 @@ public class CommonProxy {
 
     public void serverStarting(FMLServerStartingEvent event) {
         event.registerServerCommand(new RootCommand());
-    }
-
-    protected void registerEvents() {
-        FMLCommonHandler.instance().bus().register(new CapabilityEvent());
-        FMLCommonHandler.instance().bus().register(new EnterServerEvent());
-
-        MinecraftForge.EVENT_BUS.register(new CapabilityEvent());
     }
 }
