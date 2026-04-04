@@ -131,7 +131,6 @@ public final class AnimationManager {
         return PlayState.STOP;
     }
 
-    // FIXME
     @Nonnull
     public PlayState predicateOffhandHold(AnimationEvent<CustomPlayerEntity> event) {
         CustomPlayerEntity animatable = event.getAnimatable();
@@ -139,7 +138,7 @@ public final class AnimationManager {
         if (player == null) {
             return PlayState.STOP;
         }
-//        if (!Hand.OFF_HAND.isSwinging(player) && !Hand.OFF_HAND.isUsing(player)) {
+//        if (!Hand.OFF_HAND.isSwinging(player) && !player.isUsingItem()) {
 //            ItemStack offhandItem = Hand.OFF_HAND.getHeldItem(player);
 //            if (CrossbowCompat.isCharged(offhandItem)) {
 //                return playAnimation(event, "hold_offhand:charged_crossbow", ILoopType.EDefaultLoopTypes.LOOP);
@@ -177,7 +176,7 @@ public final class AnimationManager {
 //                return playAnimation(event, "carryon:" + carryName, ILoopType.EDefaultLoopTypes.LOOP);
 //            }
 //        }
-        if (!Hand.MAIN_HAND.isSwinging(player) && !Hand.MAIN_HAND.isUsing(player)) {
+        if (!Hand.MAIN_HAND.isSwinging(player) && !player.isUsingItem()) {
 //            ItemStack mainHandItem = Hand.MAIN_HAND.getHeldItem(player);
 //            PlayState gunHoldAnimation = GunClientUtil.playGunHoldAnimation(mainHandItem, event);
 //            if (gunHoldAnimation != null) {
@@ -218,7 +217,7 @@ public final class AnimationManager {
         }
         Hand swingingHand = Hand.getSwingingHand(player);
         if (swingingHand != null && !player.isPlayerSleeping()) {
-            if (player.swingProgressInt == 0) {
+            if (swingingHand == Hand.MAIN_HAND && player.swingProgressInt == 0) {
                 // 空动画用于重置 PLAY_ONCE 动画
                 playAnimation(event, "empty", ILoopType.EDefaultLoopTypes.PLAY_ONCE);
             }
@@ -242,8 +241,7 @@ public final class AnimationManager {
         if (player == null) {
             return PlayState.STOP;
         }
-        Hand usingHand = Hand.getUsingHand(player);
-        if (usingHand != null && !player.isPlayerSleeping()) {
+        if (player.isUsingItem() && !player.isPlayerSleeping()) {
             if (EntityUtil.getItemInUseMaxCount(player) == 1) {
                 event.getController().shouldResetTick = true;
                 event.getController().adjustTick(0);
@@ -251,27 +249,18 @@ public final class AnimationManager {
 //            if (Loader.isModLoaded(TAC_ID) && TacGunRenderer.isGrenade(player.getUseItem())) {
 //                return TacGunRenderer.playGrenadeAnimation(event, player.getUsedItemHand());
 //            }
-            if (usingHand == Hand.MAIN_HAND) {
-                ResourceLocation id = event.getAnimatable().getAnimation();
-                ConditionalUse conditionalUse = ConditionManager.getUseMainhand(id);
-                if (conditionalUse != null) {
-                    String name = conditionalUse.doTest(player, Hand.MAIN_HAND);
-                    if (StringUtils.isNoneBlank(name)) {
-                        return playAnimation(event, name, ILoopType.EDefaultLoopTypes.LOOP);
-                    }
+            Hand usingHand = Hand.getUsingHand(player);
+            ResourceLocation id = event.getAnimatable().getAnimation();
+            ConditionalUse conditionalUse = (usingHand == Hand.MAIN_HAND) ? ConditionManager.getUseMainhand(id) : ConditionManager.getUseOffhand(id);
+            if (conditionalUse != null) {
+                @SuppressWarnings("DataFlowIssue")
+                String name = conditionalUse.doTest(player, usingHand);
+                if (StringUtils.isNoneBlank(name)) {
+                    return playAnimation(event, name, ILoopType.EDefaultLoopTypes.LOOP);
                 }
-                return playAnimation(event, "use_mainhand", ILoopType.EDefaultLoopTypes.LOOP);
-            } else {
-                ResourceLocation id = event.getAnimatable().getAnimation();
-                ConditionalUse conditionalUse = ConditionManager.getUseOffhand(id);
-                if (conditionalUse != null) {
-                    String name = conditionalUse.doTest(player, Hand.OFF_HAND);
-                    if (StringUtils.isNoneBlank(name)) {
-                        return playAnimation(event, name, ILoopType.EDefaultLoopTypes.LOOP);
-                    }
-                }
-                return playAnimation(event, "use_offhand", ILoopType.EDefaultLoopTypes.LOOP);
             }
+            String defaultUse = (usingHand == Hand.MAIN_HAND) ? "use_mainhand" : "use_offhand";
+            return playAnimation(event, defaultUse, ILoopType.EDefaultLoopTypes.LOOP);
         }
         return PlayState.STOP;
     }
@@ -304,6 +293,7 @@ public final class AnimationManager {
         return PlayState.STOP;
     }
 
+    /// @return 不在使用且不在挥动
     private static boolean checkSwingAndUse(EntityPlayer player, Hand hand) {
         return !hand.isSwinging(player) && !hand.isUsing(player);
     }

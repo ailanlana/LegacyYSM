@@ -140,7 +140,7 @@ public class DebugAnimationKey {
         if (SwimmingCompat.hasSwimming()) {
             renderText(gui, y, "query.is_swimming", SwimmingCompat.isSwimming(player));
         }
-        renderText(gui, y, "query.is_using_item", Hand.getUsingHand(player) != null);
+        renderText(gui, y, "query.is_using_item", player.isUsingItem());
         renderText(gui, y, "query.item_in_use_duration", () -> EntityUtil.getItemInUseMaxCount(player) / 20.0);
         renderText(gui, y, "query.item_max_use_duration", () -> getMaxUseDuration(player) / 20.0);
         renderText(gui, y, "query.item_remaining_use_duration", () -> player.getItemInUseCount() / 20.0);

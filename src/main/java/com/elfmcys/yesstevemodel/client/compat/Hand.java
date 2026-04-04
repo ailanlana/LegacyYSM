@@ -34,7 +34,7 @@ public enum Hand {
 
         @Override
         public boolean isUsing(EntityPlayer player) {
-            return player.isUsingItem();
+            return player.isUsingItem() && !OFF_HAND.isUsing(player);
         }
 
         @Override
@@ -42,7 +42,6 @@ public enum Hand {
             return player.isSwingInProgress;
         }
     },
-    // FIXME：非常多问题，非常坏
     /// 左手
     OFF_HAND {
         @Override
@@ -67,12 +66,13 @@ public enum Hand {
 
         @Override
         public boolean isUsing(EntityPlayer player) {
-            return Mods.BACKHAND_INSTALLED && isUsingOffhand(player);
+            // 当安装 Backhand 时，左右手使用都会让 isUsingItem 返回 true
+            return Mods.BACKHAND_INSTALLED && player.isUsingItem() && isUsingOffhand(player);
         }
 
         @Optional.Method(modid = Mods.BACKHAND)
         private static boolean isUsingOffhand(EntityPlayer player) {
-            return BackhandUtils.isUsingOffhand(player);
+            return ((IBackhandPlayer) player).isOffhandItemInUse();
         }
 
         @Override
