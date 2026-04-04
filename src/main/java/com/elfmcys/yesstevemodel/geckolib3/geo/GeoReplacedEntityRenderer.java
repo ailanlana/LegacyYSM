@@ -129,7 +129,7 @@ public abstract class GeoReplacedEntityRenderer<T extends EntityLivingBase, E ex
         float lerpHeadRot = Interpolations.lerpYaw(entity.prevRotationYawHead, entity.rotationYawHead, partialTick);
         float netHeadYaw = lerpHeadRot - lerpBodyRot;
 
-        /// {@link RenderLivingBase#doRender(EntityLivingBase, double, double, double, float, float)}
+        /// {@link RendererLivingEntity#doRender(EntityLivingBase, double, double, double, float, float)}
         if (shouldSit && entity.ridingEntity instanceof EntityLivingBase vehicle) {
             lerpBodyRot = Interpolations.lerpYaw(vehicle.prevRenderYawOffset, vehicle.renderYawOffset, partialTick);
             netHeadYaw = lerpHeadRot - lerpBodyRot;

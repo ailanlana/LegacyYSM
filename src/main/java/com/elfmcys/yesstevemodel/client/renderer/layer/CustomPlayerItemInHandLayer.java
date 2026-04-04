@@ -70,6 +70,7 @@ public class CustomPlayerItemInHandLayer<T extends EntityLivingBase, R extends I
                 GL11.glPopMatrix();
                 return;
             }
+            /// {@link net.minecraft.client.renderer.entity.RenderPlayer#renderEquippedItems(AbstractClientPlayer, float)}
             boolean is3DBlock = customRenderer != null && customRenderer.shouldUseRenderHelper(IItemRenderer.ItemRenderType.EQUIPPED, stack, IItemRenderer.ItemRendererHelper.BLOCK_3D);
             if (is3DBlock || (item instanceof ItemBlock && RenderBlocks.renderItemIn3d(Block.getBlockFromItem(item).getRenderType()))) {
                 float scale = 0.5F;
