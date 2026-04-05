@@ -52,12 +52,12 @@ public class AnimationRegister {
 
         register("swim_stand", Priority.NORMAL, (player, event) -> player.isInWater());
         register("attacked", ILoopType.EDefaultLoopTypes.PLAY_ONCE, Priority.NORMAL, (player, event) -> player.hurtTime > 0);
-        register("jump", Priority.NORMAL, (player, event) -> !player.onGround && !player.isInWater());
-        register("sneak", Priority.NORMAL, (player, event) -> player.onGround && player.isSneaking() && Math.abs(event.getLimbSwingAmount()) > MIN_SPEED);
-        register("sneaking", Priority.NORMAL, (player, event) -> player.onGround && player.isSneaking());
+        register("jump", Priority.NORMAL, (player, event) -> !EntityUtil.isOnGround(player) && !player.isInWater());
+        register("sneak", Priority.NORMAL, (player, event) -> EntityUtil.isOnGround(player) && player.isSneaking() && Math.abs(event.getLimbSwingAmount()) > MIN_SPEED);
+        register("sneaking", Priority.NORMAL, (player, event) -> EntityUtil.isOnGround(player) && player.isSneaking());
 
-        register("run", Priority.LOW, (player, event) -> player.onGround && player.isSprinting());
-        register("walk", Priority.LOW, (player, event) -> player.onGround && event.getLimbSwingAmount() > MIN_SPEED);
+        register("run", Priority.LOW, (player, event) -> EntityUtil.isOnGround(player) && player.isSprinting());
+        register("walk", Priority.LOW, (player, event) -> EntityUtil.isOnGround(player) && event.getLimbSwingAmount() > MIN_SPEED);
 
         register("idle", Priority.LOWEST, (player, event) -> true);
     }
@@ -174,13 +174,13 @@ public class AnimationRegister {
         parser.setValue("query.is_first_person", () -> MolangUtils.booleanToFloat(mc.gameSettings.thirdPersonView == 0));
         parser.setValue("query.is_in_water", () -> MolangUtils.booleanToFloat(player.isInWater()));
         parser.setValue("query.is_in_water_or_rain", () -> MolangUtils.booleanToFloat(player.isWet()));
-        parser.setValue("query.is_jumping", () -> MolangUtils.booleanToFloat(!player.capabilities.isFlying && !player.isRiding() && !player.onGround && !player.isInWater()));
+        parser.setValue("query.is_jumping", () -> MolangUtils.booleanToFloat(!player.capabilities.isFlying && !player.isRiding() && !EntityUtil.isOnGround(player) && !player.isInWater()));
         parser.setValue("query.is_on_fire", () -> MolangUtils.booleanToFloat(player.isBurning()));
-        parser.setValue("query.is_on_ground", () -> MolangUtils.booleanToFloat(player.onGround));
+        parser.setValue("query.is_on_ground", () -> MolangUtils.booleanToFloat(EntityUtil.isOnGround(player)));
         parser.setValue("query.is_playing_dead", () -> MolangUtils.booleanToFloat(!player.isEntityAlive()));
         parser.setValue("query.is_riding", () -> MolangUtils.booleanToFloat(player.isRiding()));
         parser.setValue("query.is_sleeping", () -> MolangUtils.booleanToFloat(player.isPlayerSleeping()));
-        parser.setValue("query.is_sneaking", () -> MolangUtils.booleanToFloat(player.onGround && player.isSneaking()));
+        parser.setValue("query.is_sneaking", () -> MolangUtils.booleanToFloat(EntityUtil.isOnGround(player) && player.isSneaking()));
         parser.setValue("query.is_spectator", () -> MolangUtils.booleanToFloat(SpectatorCompat.isSpectator(player)));
         parser.setValue("query.is_sprinting", () -> MolangUtils.booleanToFloat(player.isSprinting()));
         if (SwimmingCompat.hasSwimming()) {
@@ -235,7 +235,7 @@ public class AnimationRegister {
         parser.setValue("ysm.is_close_eyes", () -> getEyeCloseState(animationEvent, player));
         parser.setValue("ysm.is_passenger", () -> MolangUtils.booleanToFloat(player.isRiding()));
         parser.setValue("ysm.is_sleep", () -> MolangUtils.booleanToFloat(player.isPlayerSleeping()));
-        parser.setValue("ysm.is_sneak", () -> MolangUtils.booleanToFloat(player.onGround && player.isSneaking()));
+        parser.setValue("ysm.is_sneak", () -> MolangUtils.booleanToFloat(EntityUtil.isOnGround(player) && player.isSneaking()));
 //        if (TridentCompat.hasRiptide()) {
 //            parser.setValue("ysm.is_riptide", () -> MolangUtils.booleanToFloat(TridentCompat.isAutoSpinAttack(player)));
 //        }

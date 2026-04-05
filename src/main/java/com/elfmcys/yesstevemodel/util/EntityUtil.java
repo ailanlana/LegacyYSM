@@ -49,6 +49,15 @@ public final class EntityUtil {
         return 20 * (float) (entity.posY - entity.prevPosY);
     }
 
+    public static boolean isOnGround(EntityPlayer player) {
+        if (player instanceof EntityPlayerSP) return player.onGround;
+        if (player.worldObj == null || player.boundingBox == null) return false;
+        // 检查是否有碰撞箱
+        return !player.worldObj.getCollidingBoundingBoxes(
+                player, player.boundingBox.getOffsetBoundingBox(0.0D, -0.08D, 0.0D)
+        ).isEmpty();
+    }
+
     public static int getItemInUseMaxCount(EntityPlayer player) {
         return player.isUsingItem() ? player.getItemInUse().getMaxItemUseDuration() - player.getItemInUseCount() : 0;
     }
