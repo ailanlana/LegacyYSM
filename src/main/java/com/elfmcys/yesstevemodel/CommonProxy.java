@@ -4,6 +4,7 @@ import com.elfmcys.yesstevemodel.command.RootCommand;
 import com.elfmcys.yesstevemodel.config.Config;
 import com.elfmcys.yesstevemodel.event.CapabilityEvent;
 import com.elfmcys.yesstevemodel.event.EnterServerEvent;
+import com.elfmcys.yesstevemodel.event.FlightSyncEvent;
 import com.elfmcys.yesstevemodel.model.ServerModelManager;
 import com.elfmcys.yesstevemodel.network.NetworkHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -21,8 +22,10 @@ public class CommonProxy {
 
         FMLCommonHandler.instance().bus().register(new CapabilityEvent());
         FMLCommonHandler.instance().bus().register(new EnterServerEvent());
+        FMLCommonHandler.instance().bus().register(new FlightSyncEvent());
 
         MinecraftForge.EVENT_BUS.register(new CapabilityEvent());
+        MinecraftForge.EVENT_BUS.register(new FlightSyncEvent());
     }
 
     public void init(FMLInitializationEvent event) {

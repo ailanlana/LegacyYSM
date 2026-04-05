@@ -11,6 +11,7 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -43,6 +44,7 @@ public final class NetworkHandler {
         CHANNEL.registerMessage(RefreshModelManage.Handler.class, RefreshModelManage.class, 13, Side.SERVER);
         CHANNEL.registerMessage(HandleFile.Handler.class, HandleFile.class, 14, Side.SERVER);
         CHANNEL.registerMessage(SyncArrowModel.Handler.class, SyncArrowModel.class, 15, Side.CLIENT);
+        CHANNEL.registerMessage(SyncPlayerFlightState.Handler.class, SyncPlayerFlightState.class, 16, Side.CLIENT);
         initBukkit();
     }
 
@@ -57,6 +59,10 @@ public final class NetworkHandler {
         if (player instanceof EntityPlayerMP playerMP) {
             CHANNEL.sendTo(message, playerMP);
         }
+    }
+
+    public static void sendToAllAroundEntity(IMessage message, Entity entity, double range) {
+        CHANNEL.sendToAllAround(message, new NetworkRegistry.TargetPoint(entity.dimension, entity.posX, entity.posY, entity.posZ, range));
     }
 
     @NetworkCheckHandler

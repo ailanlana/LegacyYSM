@@ -47,7 +47,7 @@ public class AnimationRegister {
         register("boat", Priority.HIGH, (player, event) -> player.ridingEntity instanceof EntityBoat);
         register("sit", Priority.HIGH, (player, event) -> player.isRiding());
 
-        register("fly", Priority.HIGH, (player, event) -> player.capabilities.isFlying);
+        register("fly", Priority.HIGH, (player, event) -> EntityUtil.isFlying(player));
         register("elytra_fly", Priority.HIGH, (player, event) -> ElytraCompat.isElytraFlying(player));
 
         register("swim_stand", Priority.NORMAL, (player, event) -> player.isInWater());
@@ -174,7 +174,7 @@ public class AnimationRegister {
         parser.setValue("query.is_first_person", () -> MolangUtils.booleanToFloat(mc.gameSettings.thirdPersonView == 0));
         parser.setValue("query.is_in_water", () -> MolangUtils.booleanToFloat(player.isInWater()));
         parser.setValue("query.is_in_water_or_rain", () -> MolangUtils.booleanToFloat(player.isWet()));
-        parser.setValue("query.is_jumping", () -> MolangUtils.booleanToFloat(!player.capabilities.isFlying && !player.isRiding() && !EntityUtil.isOnGround(player) && !player.isInWater()));
+        parser.setValue("query.is_jumping", () -> MolangUtils.booleanToFloat(!EntityUtil.isFlying(player) && !player.isRiding() && !EntityUtil.isOnGround(player) && !player.isInWater()));
         parser.setValue("query.is_on_fire", () -> MolangUtils.booleanToFloat(player.isBurning()));
         parser.setValue("query.is_on_ground", () -> MolangUtils.booleanToFloat(EntityUtil.isOnGround(player)));
         parser.setValue("query.is_playing_dead", () -> MolangUtils.booleanToFloat(!player.isEntityAlive()));

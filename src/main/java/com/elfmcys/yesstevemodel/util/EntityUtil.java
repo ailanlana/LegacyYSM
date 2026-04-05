@@ -12,10 +12,15 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * 用于补全一部分旧版缺失的内容
  */
 public final class EntityUtil {
+    private static final Set<Integer> FLYING_PLAYERS = ConcurrentHashMap.newKeySet();
+
     public static float getViewXRot(Entity entity, float partialTick) {
         return partialTick == 1.0F ? entity.rotationPitch : Interpolations.lerp(entity.prevRotationPitch, entity.rotationPitch, partialTick);
     }
@@ -52,10 +57,23 @@ public final class EntityUtil {
     public static boolean isOnGround(EntityPlayer player) {
         if (player instanceof EntityPlayerSP) return player.onGround;
         if (player.worldObj == null || player.boundingBox == null) return false;
-        // 检查是否有碰撞箱
         return !player.worldObj.getCollidingBoundingBoxes(
                 player, player.boundingBox.getOffsetBoundingBox(0.0D, -0.08D, 0.0D)
         ).isEmpty();
+    }
+
+    public static boolean isFlying(EntityPlayer player) {
+        if (player instanceof EntityPlayerSP) return player.capabilities.isFlying;
+        return FLYING_PLAYERS.contains(player.getEntityId());
+    }
+
+    public static void setSyncedPlayerFlying(int entityId, boolean flying) {
+        if (flying) FLYING_PLAYERS.add(entityId);
+        else FLYING_PLAYERS.remove(entityId);
+    }
+
+    public static void clearSyncedPlayerFlying() {
+        FLYING_PLAYERS.clear();
     }
 
     public static int getItemInUseMaxCount(EntityPlayer player) {

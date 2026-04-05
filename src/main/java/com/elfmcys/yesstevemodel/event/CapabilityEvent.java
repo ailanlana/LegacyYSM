@@ -14,7 +14,6 @@ import com.elfmcys.yesstevemodel.network.message.SyncModelInfo;
 import com.elfmcys.yesstevemodel.network.message.SyncStarModels;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
-import cpw.mods.fml.common.network.NetworkRegistry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
@@ -74,7 +73,7 @@ public final class CapabilityEvent {
         if (event.target instanceof EntityArrow arrow) {
             String modelId = ((IArrowExtraInfo) arrow).getYsmModelId();
             if (!IArrowExtraInfo.EMPTY.equals(modelId)) {
-                NetworkHandler.CHANNEL.sendToAllAround(new SyncArrowModel(arrow.getEntityId(), modelId), new NetworkRegistry.TargetPoint(arrow.dimension, arrow.posX, arrow.posY, arrow.posZ, 64.0D));
+                NetworkHandler.sendToAllAroundEntity(new SyncArrowModel(arrow.getEntityId(), modelId), arrow, 64.0D);
             }
         }
     }
@@ -117,7 +116,7 @@ public final class CapabilityEvent {
             getModelInfoCap(player).ifPresent(cap -> {
                 if (cap.isDirty()) {
                     SyncModelInfo syncMsg = new SyncModelInfo(player.getEntityId(), cap);
-                    NetworkHandler.CHANNEL.sendToAllAround(syncMsg, new NetworkRegistry.TargetPoint(player.dimension, player.posX, player.posY, player.posZ, 64.0D));
+                    NetworkHandler.sendToAllAroundEntity(syncMsg, player, 64.0D);
                     NetworkHandler.sendToClientPlayer(syncMsg, player);
                     cap.setDirty(false);
                 }
