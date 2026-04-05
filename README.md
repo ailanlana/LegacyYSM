@@ -1,20 +1,14 @@
 # Yes Steve Model
 
-WIP
+本分支为模组提供了 Minecraft 1.7.10 支持，内容会定期与 1.12.2 同步。
 
-[旧版 Yes Steve Model 模组](https://github.com/YesSteveModel/LgeacyYSM) 的 Minecraft 1.7.10 完整移植。会定期同步 1.12.2 的内容。
-
-## 概述
-
-Yes Steve Model 是一个修改原版玩家模型的 Minecraft 模组。
-
-它采用了 GeckoLib 作为核心，使用 Minecraft 基岩版模型和动画文件，从而使玩家能够随心所欲的自定义玩家模型和动画。
+此自述文档仅补充 1.7.10 分支特有的内容，其余许可证等内容参照 1.12.2 分支自述文档。
 
 ## 状况
 
 ### 兼容性
 
-模组需要 [MixinBooter](https://github.com/CleanroomMC/MixinBooter) 作为前置。
+模组需要 [UniMixins](https://github.com/LegacyModdingMC/UniMixins) 作为前置。
 
 - 模型
   - 兼容 1.1.6 及以下版本三种格式的模型
@@ -23,43 +17,18 @@ Yes Steve Model 是一个修改原版玩家模型的 Minecraft 模组。
   - 永远不会兼容 1.2.0 及以上版本 YSM 加密格式的模型
 
 - 模组
-  - 兼容 [Aqua Acrobatics](https://github.com/embeddedt/aquaacrobatics) 的游泳动作
-  - 兼容 [Oceanic Expanse](https://github.com/SirSquidly/Oceanic-Expanse)、[Trident Mod](https://github.com/jiGGO1/Trident)、[Future MC](https://github.com/thedarkcolour/Future-MC) 的三叉戟动作
-  - 兼容 [Crossbows Backport](https://github.com/SmileycorpMC/crossbows-backport)、[Crossbow Mod](https://github.com/jbredwards/Crossbow-Mod) 的弩动作
-  - 兼容 [Deeper Depths](https://github.com/SmileycorpMC/Deeper-Depths) 的望远镜动作
-  - 兼容 [Mekanism Mixin Help](https://github.com/sddsd2332/MekanismMixinHelp) 的 HDPE 鞘翅
+  - 兼容 [Backhand](https://github.com/GTNewHorizons/Backhand) 副手渲染
+  - 兼容 [Aqua Acrobatics Legacy](https://github.com/PufferTeam-ModArchive/aquaacrobatics) 的游泳动作
+  - 兼容 [Modern KeyBinding](https://github.com/Nova-Committee/ModernKeyBinding) 和 [Controlling GTNH](https://github.com/GTNewHorizons/Controlling) 注册组合键
 
 ### 已知问题
 
-- 加载模型时可见 Molang 报错，由 Molang 引擎过旧导致
-- 模型状态似乎有污染问题，导致有时模型块变换有误
-- 视角旋转过快时，头部角度会跳变
-- 模型预览界花和草光照不对
-- 部分文字颜色不对，这是因为新版文本组件会自动重置颜色，旧版 I18n 处理 String 时不会
-- RenderFirstPlayerBackground 未经测试
-- 刚进游戏时会有一瞬间报纹理丢失错误，这是因为纹理还未来得及同步
+除 1.12.2 已知问题以外，还有如下问题。
 
-## 协议
-
-### 源码
-
-本项目的源码与上游 YSM 一样，使用 **[BSD-3-Clause](LICENSE)** 协议，您可以自由地使用、修改和分发代码，仅需要保留原始的版权声明。
-
-### 资源
-
-仓库中自带的模型文件采用不同的协议：
-
-- **默认模型**: 采用 **CC0 (Creative Commons Zero)** 协议，完全开放，无任何使用限制
-- **酒狐 (Wine Fox) 模型**: 采用 **CC BY-NC-SA 4.0** 协议，允许非商业使用，需要署名，并且衍生作品需要采用相同协议
-
-仓库中的 **[模组图标](src/main/resources/yesstevemodel.png)** 提取自更新版本的 YSM，采用 **CC BY-NC-SA 4.0** 协议。
-
-请在使用仓库内资源时严格遵守对应的协议要求。
-
-## 致谢
-
-- [YSM 开发组](https://github.com/YesSteveModel) 开源了旧版 YSM
-- [一只大胡哩](https://github.com/Huli-fox) 和 [凯西](https://github.com/kaixiten) 制作了最初的 [1.7.10 版本](https://github.com/Huli-fox/YesSteveModel-Unofficial)
-- [sddsd2332](https://github.com/sddsd2332) 制作了 [1.12.2 移植版](https://github.com/sddsd2332/YesSteveModel-Unofficial)，并为本项目做出了杰出贡献
-- [GeckoLib](https://github.com/bernie-g/geckolib) 的所有开发者
-- [kappa-maintainer](https://github.com/kappa-maintainer) 制作了 GeckoLib 延续版 [SauriaLib](https://github.com/kappa-maintainer/geckolib)
+- 模型预览界面床未渲染
+- 副手挥动和主手有差别
+- 骑乘 Y 偏移与新版不一致
+- 手持物品位置与新版不一致
+- 鞘翅兼容没做完
+- 原版玩家模型 UV 乱
+- 多人游戏无法得知他人的 onGround 状态

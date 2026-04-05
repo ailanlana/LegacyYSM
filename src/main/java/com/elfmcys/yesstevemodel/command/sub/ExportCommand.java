@@ -1,9 +1,9 @@
 package com.elfmcys.yesstevemodel.command.sub;
 
 import com.elfmcys.yesstevemodel.YesSteveModel;
-import com.elfmcys.yesstevemodel.command.CommandUtils;
 import com.elfmcys.yesstevemodel.command.argument.ModelsArgument;
 import com.elfmcys.yesstevemodel.model.ServerModelManager;
+import com.elfmcys.yesstevemodel.util.CommandUtils;
 import com.elfmcys.yesstevemodel.util.YesModelUtils;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;

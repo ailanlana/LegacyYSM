@@ -1,13 +1,13 @@
 package com.elfmcys.yesstevemodel.command.sub;
 
 import com.elfmcys.yesstevemodel.YesSteveModel;
-import com.elfmcys.yesstevemodel.command.CommandUtils;
 import com.elfmcys.yesstevemodel.command.argument.ModelsArgument;
 import com.elfmcys.yesstevemodel.command.argument.TexturesArgument;
 import com.elfmcys.yesstevemodel.event.CapabilityEvent;
 import com.elfmcys.yesstevemodel.model.ServerModelManager;
 import com.elfmcys.yesstevemodel.model.format.FormatManager;
 import com.elfmcys.yesstevemodel.model.format.ServerModelInfo;
+import com.elfmcys.yesstevemodel.util.CommandUtils;
 import com.elfmcys.yesstevemodel.util.ModelIdUtil;
 import com.elfmcys.yesstevemodel.util.ResourceUtil;
 import com.google.gson.Gson;

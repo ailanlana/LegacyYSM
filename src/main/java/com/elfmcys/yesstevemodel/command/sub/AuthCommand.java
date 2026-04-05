@@ -1,12 +1,12 @@
 package com.elfmcys.yesstevemodel.command.sub;
 
 import com.elfmcys.yesstevemodel.YesSteveModel;
-import com.elfmcys.yesstevemodel.command.CommandUtils;
 import com.elfmcys.yesstevemodel.command.argument.ModelsArgument;
 import com.elfmcys.yesstevemodel.event.CapabilityEvent;
 import com.elfmcys.yesstevemodel.model.ServerModelManager;
 import com.elfmcys.yesstevemodel.network.NetworkHandler;
 import com.elfmcys.yesstevemodel.network.message.SyncAuthModels;
+import com.elfmcys.yesstevemodel.util.CommandUtils;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;

@@ -1,4 +1,4 @@
-package com.elfmcys.yesstevemodel.command;
+package com.elfmcys.yesstevemodel.util;
 
 import com.google.common.collect.Lists;
 import net.minecraft.command.*;
