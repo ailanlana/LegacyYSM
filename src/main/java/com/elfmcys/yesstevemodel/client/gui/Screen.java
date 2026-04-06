@@ -3,6 +3,7 @@ package com.elfmcys.yesstevemodel.client.gui;
 import com.elfmcys.yesstevemodel.client.compat.KeyCompat;
 import com.elfmcys.yesstevemodel.client.gui.button.Button;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.settings.KeyBinding;
@@ -10,6 +11,7 @@ import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -137,6 +139,18 @@ public class Screen extends GuiScreen {
             lineList.addAll(this.fontRendererObj.listFormattedStringToWidth(para, wrapWidth));
         }
         return lineList;
+    }
+
+    @Override
+    public void drawCenteredString(@Nonnull FontRenderer fontRenderer, @Nonnull String text, int x, int y, int color) {
+        super.drawCenteredString(fontRenderer, text, x, y, color);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    @Override
+    public void drawString(@Nonnull FontRenderer fontRenderer, @Nonnull String text, int x, int y, int color) {
+        super.drawString(fontRenderer, text, x, y, color);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     public static boolean isAltKeyDown() {

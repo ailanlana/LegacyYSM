@@ -99,6 +99,18 @@ public class Button extends GuiButton {
         this.onPress.accept(this);
     }
 
+    @Override
+    public void drawCenteredString(@Nonnull FontRenderer fontRenderer, @Nonnull String text, int x, int y, int color) {
+        super.drawCenteredString(fontRenderer, text, x, y, color);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    @Override
+    public void drawString(@Nonnull FontRenderer fontRenderer, @Nonnull String text, int x, int y, int color) {
+        super.drawString(fontRenderer, text, x, y, color);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
     /**
      * Whether the mouse cursor is currently over the button.
      *
