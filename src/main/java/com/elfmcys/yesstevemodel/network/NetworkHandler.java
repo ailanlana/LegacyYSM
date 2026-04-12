@@ -1,12 +1,10 @@
 package com.elfmcys.yesstevemodel.network;
 
-import com.elfmcys.yesstevemodel.YesSteveModel;
 import com.elfmcys.yesstevemodel.bukkit.message.OpenModelGuiMessage;
 import com.elfmcys.yesstevemodel.bukkit.message.SetNpcModelAndTexture;
 import com.elfmcys.yesstevemodel.bukkit.message.SyncNpcDataMessage;
 import com.elfmcys.yesstevemodel.bukkit.message.UpdateNpcDataMessage;
 import com.elfmcys.yesstevemodel.network.message.*;
-import cpw.mods.fml.common.network.NetworkCheckHandler;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -15,11 +13,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 
-import javax.annotation.Nonnull;
-import java.util.Map;
-
 public final class NetworkHandler {
-    private static final String VERSION = "1.0.0";
     public static final SimpleNetworkWrapper CHANNEL = NetworkRegistry.INSTANCE.newSimpleChannel("yesstevemodel");
     public static final int OPEN_NPC_MODEL_GUI = 93;
     public static final int SET_NPC_MODEL_ID = 94;
@@ -63,15 +57,5 @@ public final class NetworkHandler {
 
     public static void sendToAllAroundEntity(IMessage message, Entity entity, double range) {
         CHANNEL.sendToAllAround(message, new NetworkRegistry.TargetPoint(entity.dimension, entity.posX, entity.posY, entity.posZ, range));
-    }
-
-    @NetworkCheckHandler
-    @SuppressWarnings("unused")
-    public boolean checkVersion(@Nonnull Map<String, String> mods, Side side) {
-        if (mods.containsKey(YesSteveModel.MOD_ID)) {
-            String remoteVersion = mods.get(YesSteveModel.MOD_ID);
-            return VERSION.equals(remoteVersion);
-        }
-        return false; // 客户端必装
     }
 }
