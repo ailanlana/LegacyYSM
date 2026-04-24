@@ -2,13 +2,11 @@ package com.elfmcys.yesstevemodel.event;
 
 import com.elfmcys.yesstevemodel.network.NetworkHandler;
 import com.elfmcys.yesstevemodel.network.message.SyncPlayerFlightState;
-import com.elfmcys.yesstevemodel.util.EntityUtil;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.entity.player.PlayerEvent.StartTracking;
-import net.minecraftforge.event.world.WorldEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +18,7 @@ public final class FlightSyncEvent {
     @SubscribeEvent
     public void onTrackingPlayer(StartTracking event) {
         if (event.target instanceof EntityPlayer trackPlayer) {
-            EntityPlayer player = event.entityPlayer;
-            NetworkHandler.sendToClientPlayer(new SyncPlayerFlightState(trackPlayer.getEntityId(), trackPlayer.capabilities.isFlying), player);
+            NetworkHandler.sendToClientPlayer(new SyncPlayerFlightState(trackPlayer.getEntityId(), trackPlayer.capabilities.isFlying), event.entityPlayer);
         }
     }
 
@@ -45,13 +42,5 @@ public final class FlightSyncEvent {
     @SubscribeEvent
     public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         LAST_SYNCED_FLIGHT.remove(event.player.getUniqueID());
-        EntityUtil.clearSyncedPlayerFlying();
-    }
-
-    @SubscribeEvent
-    public void onWorldUnload(WorldEvent.Unload event) {
-        if (event.world.isRemote) {
-            EntityUtil.clearSyncedPlayerFlying();
-        }
     }
 }

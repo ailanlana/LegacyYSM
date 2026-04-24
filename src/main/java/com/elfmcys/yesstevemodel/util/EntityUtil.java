@@ -1,5 +1,6 @@
 package com.elfmcys.yesstevemodel.util;
 
+import com.elfmcys.yesstevemodel.client.event.FlightCacheEvent;
 import com.elfmcys.yesstevemodel.geckolib3.core.util.MathUtil;
 import com.elfmcys.yesstevemodel.geckolib3.util.VectorUtils;
 import com.elfmcys.yesstevemodel.mclib.utils.Interpolations;
@@ -12,15 +13,10 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * 用于补全一部分旧版缺失的内容
  */
 public final class EntityUtil {
-    private static final Set<Integer> FLYING_PLAYERS = ConcurrentHashMap.newKeySet();
-
     public static float getViewXRot(Entity entity, float partialTick) {
         return partialTick == 1.0F ? entity.rotationPitch : Interpolations.lerp(entity.prevRotationPitch, entity.rotationPitch, partialTick);
     }
@@ -64,16 +60,7 @@ public final class EntityUtil {
 
     public static boolean isFlying(EntityPlayer player) {
         if (player instanceof EntityPlayerSP) return player.capabilities.isFlying;
-        return FLYING_PLAYERS.contains(player.getEntityId());
-    }
-
-    public static void setSyncedPlayerFlying(int entityId, boolean flying) {
-        if (flying) FLYING_PLAYERS.add(entityId);
-        else FLYING_PLAYERS.remove(entityId);
-    }
-
-    public static void clearSyncedPlayerFlying() {
-        FLYING_PLAYERS.clear();
+        return FlightCacheEvent.isFlying(player.getEntityId());
     }
 
     public static int getItemInUseMaxCount(EntityPlayer player) {

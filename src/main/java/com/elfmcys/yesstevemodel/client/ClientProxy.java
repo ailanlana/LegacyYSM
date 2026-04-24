@@ -34,6 +34,7 @@ public class ClientProxy extends CommonProxy {
         Mods.init();
 
         FMLCommonHandler.instance().bus().register(new ConfigSyncEvent());
+        FMLCommonHandler.instance().bus().register(new FlightCacheEvent());
         FMLCommonHandler.instance().bus().register(new PlayerMoveEvent());
 
         FMLCommonHandler.instance().bus().register(new ClearNPCdataEvent());
@@ -45,6 +46,7 @@ public class ClientProxy extends CommonProxy {
         FMLCommonHandler.instance().bus().register(new PlayerModelScreenKey());
 
         MinecraftForge.EVENT_BUS.register(new DebugAnimationKey());
+        MinecraftForge.EVENT_BUS.register(new FlightCacheEvent());
         MinecraftForge.EVENT_BUS.register(new ReloadResourceEvent());
         MinecraftForge.EVENT_BUS.register(new RenderExtraPlayerScreenEvent());
         MinecraftForge.EVENT_BUS.register(new RenderFirstPlayerBackground());
