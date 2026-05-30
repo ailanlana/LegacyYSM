@@ -60,7 +60,7 @@ public final class CapabilityEvent {
         }
 
         // Entity Cap - 附着在实体上，绑定 Geo 实体，运行时创建，客户端专用
-        if (entity.world.isRemote) {
+        if (entity.world != null && entity.world.isRemote) {
             if (entity instanceof EntityPlayer player) {
                 if (!getCustomPlayerEntityCap(player).isPresent() && !event.getCapabilities().containsKey(CUSTOM_PLAYER_CAP)) {
                     event.addCapability(CUSTOM_PLAYER_CAP, new CustomPlayerEntityCapabilityProvider(player));
